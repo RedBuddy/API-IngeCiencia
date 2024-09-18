@@ -1,0 +1,35 @@
+@api = http://localhost:3000/recursos
+
+### Consultar todos los recursos
+GET {{api}}
+
+### Insertar recursos
+POST {{api}}
+Content-Type: application/json
+
+{
+    "Nombre": "Orlando Apodaca",
+    "Correo": "orlando@gmail.com",
+    "Password": "webo123",
+    "TipoUsuario": "lector"
+  }
+
+
+### Consulta recursos por ID
+GET {{api}}/1
+
+
+### Eliminar recursos por Nombre
+DELETE {{api}}/1
+
+
+### Actualizar usuario
+PUT {{api}}/1
+Content-Type: application/json
+
+{
+   "Nombre": "Orlando Apodaca",
+    "Correo": "orlando@gmail.com",
+    "Password": "webo123",
+    "TipoUsuario": "lector"
+  }

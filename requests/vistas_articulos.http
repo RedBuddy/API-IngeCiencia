@@ -1,0 +1,35 @@
+@api = http://localhost:3000/vistas_articulos
+
+### Consultar todos los vistas_articulos
+GET {{api}}
+
+### Insertar vistas_articulos
+POST {{api}}
+Content-Type: application/json
+
+{
+    "Nombre": "Orlando Apodaca",
+    "Correo": "orlando@gmail.com",
+    "Password": "webo123",
+    "TipoUsuario": "lector"
+  }
+
+
+### Consulta vistas_articulos por ID
+GET {{api}}/1
+
+
+### Eliminar vistas_articulos por Nombre
+DELETE {{api}}/1
+
+
+### Actualizar usuario
+PUT {{api}}/1
+Content-Type: application/json
+
+{
+   "Nombre": "Orlando Apodaca",
+    "Correo": "orlando@gmail.com",
+    "Password": "webo123",
+    "TipoUsuario": "lector"
+  }

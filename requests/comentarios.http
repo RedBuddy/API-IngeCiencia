@@ -1,0 +1,35 @@
+@api = http://localhost:3000/comentarios
+
+### Consultar todos los comentarios
+GET {{api}}
+
+### Insertar comentarios
+POST {{api}}
+Content-Type: application/json
+
+{
+    "Nombre": "Orlando Apodaca",
+    "Correo": "orlando@gmail.com",
+    "Password": "webo123",
+    "TipoUsuario": "lector"
+  }
+
+
+### Consulta comentarios por ID
+GET {{api}}/1
+
+
+### Eliminar comentarios por Nombre
+DELETE {{api}}/1
+
+
+### Actualizar usuario
+PUT {{api}}/1
+Content-Type: application/json
+
+{
+   "Nombre": "Orlando Apodaca",
+    "Correo": "orlando@gmail.com",
+    "Password": "webo123",
+    "TipoUsuario": "lector"
+  }
