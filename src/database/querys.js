@@ -1,32 +1,29 @@
 export const query = {
-    //Tabla Usuarios
-    select_usuarios: 'SELECT * FROM USUARIOS',
-    insert_usuarios: 'INSERT INTO USUARIOS (Nombre, Correo, Password, TipoUsuario, FechaRegistro) VALUES (@nombre, @correo, @password, @tipoUsuario, @fechaRegistro)',
-    select_usuarios_byid: 'SELECT * FROM USUARIOS WHERE Id = @id',
-    select_usuarios_byname: 'SELECT * FROM USUARIOS WHERE Nombre = @nombre',
-    delete_usuarios_byid: 'DELETE FROM USUARIOS WHERE Id = @id',
-    update_usuarios_byid: 'UPDATE USUARIOS SET Nombre = @nombre, Correo = @correo, TipoUsuario = @tipoUsuario, FechaRegistro = @fechaRegistro WHERE Id = @id',
-    return_usuarios_id: 'SELECT TOP 1 id FROM USUARIOS ORDER BY id DESC',
+    // Table Users
+    select_users: 'SELECT * FROM users',
+    insert_users: 'INSERT INTO users (username, email, password, first_name, last_name, profile_img_path) VALUES (?, ?, ?, ?, ?, ?)',
+    select_users_byid: 'SELECT * FROM users WHERE id = ?',
+    select_users_byname: 'SELECT * FROM users WHERE nombre = ?',
+    delete_users_byid: 'DELETE FROM users WHERE id = ?',
+    update_users_byid: 'UPDATE users SET username = ?, email = ?, first_name = ?, last_name = ?, profile_img_path = ? WHERE id = ?',
+    // return_users_id: 'SELECT id FROM users ORDER BY id DESC LIMIT 1',
 
+    // Obtener todos los artículos
+    select_articles: 'SELECT * FROM articles',
+    insert_articles: 'INSERT INTO articles (id_author, title, abstract, publication_date, link, pdf_path, preview_path) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    select_articles_byid: 'SELECT * FROM articles WHERE id = ?',
+    delete_articles_byid: 'DELETE FROM articles WHERE id = ?',
+    update_articles_byid: 'UPDATE articles SET id_author = ?, title = ?, abstract = ?, publication_date = ?, link = ?, pdf_path = ?, preview_path = ? WHERE id = ?',
 
-    //Tabla Articulos
-    select_articulos: 'SELECT * FROM ARTICULOS',
-
-    //Tabla Categorias
-
+    // Tabla Categorías
     select_categorias: 'SELECT * FROM CATEGORIAS',
 
-    //Tabla Comentarios
-
+    // Tabla Comentarios
     select_comentarios: 'SELECT * FROM COMENTARIOS',
 
-    //Tabla Recursos
-
+    // Tabla Recursos
     select_recursos: 'SELECT * FROM RECURSOS',
 
-    //Tabla Vistas Articulos
-
-    select_vistas_articulos: 'SELECT * FROM VISTAS_ARTICULOS'
-
-
-}
+    // Tabla Vistas Artículos
+    select_vistas_articulos: 'SELECT * FROM VISTAS_ARTICULOS',
+};

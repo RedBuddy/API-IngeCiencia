@@ -1,56 +1,151 @@
 
-CREATE TABLE USUARIOS (
-    id INT PRIMARY KEY IDENTITY(1,1),
-    nombre VARCHAR(100) NOT NULL,
-    correo VARCHAR(100) UNIQUE NOT NULL,
+-- Tabla ROLES
+CREATE TABLE ROLES (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    role_name VARCHAR(50) UNIQUE NOT NULL
+);
+
+-- Tabla USERS
+CREATE TABLE USERS (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
-    tipoUsuario VARCHAR(20) CHECK (tipoUsuario IN ('investigador', 'lector', 'administrador')) NOT NULL,
-    fechaRegistro DATETIME DEFAULT GETDATE(),
-    verificado BIT DEFAULT 0
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    registration_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    profile_img_path VARCHAR(255),
+    verified BOOLEAN DEFAULT 0,
+    role_id INT DEFAULT 1,
+    status ENUM('active', 'inactive') DEFAULT 'active',
+    FOREIGN KEY (role_id) REFERENCES ROLES(id)
 );
 
-
-CREATE TABLE ARTICULOS (
-    id INT PRIMARY KEY IDENTITY(1,1),
-    idInvestigador INT FOREIGN KEY REFERENCES Usuarios(id),
-    titulo VARCHAR(255) NOT NULL,
-    resumen VARCHAR(1000),
-    contenido VARCHAR(MAX) NOT NULL,
-    categoria VARCHAR(100) NOT NULL,
-    archivoPDF VARCHAR(255),  -- Ruta del archivo PDF en el servidor
-    fechaPublicacion DATETIME DEFAULT GETDATE(),
-    estado VARCHAR(20) CHECK (estado IN ('publicado', 'borrador', 'rechazado')) DEFAULT 'publicado'
+-- Tabla ARTICLES
+CREATE TABLE ARTICLES (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    id_author INT,
+    title VARCHAR(255) NOT NULL,
+    abstract TEXT,
+    publication_date DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    link VARCHAR(255),
+    pdf_path VARCHAR(255),
+    preview_path VARCHAR(255),
+    status ENUM('published', 'archived') DEFAULT 'published',
+    FOREIGN KEY (id_author) REFERENCES USERS(id)
 );
 
-
-CREATE TABLE CATEGORIAS (
-    id INT PRIMARY KEY IDENTITY(1,1),
-    nombre VARCHAR(100) UNIQUE NOT NULL
+-- Tabla CATEGORIES
+CREATE TABLE CATEGORIES (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    category_name VARCHAR(100) UNIQUE NOT NULL
 );
 
-
-CREATE TABLE COMENTARIOS (
-    id INT PRIMARY KEY IDENTITY(1,1),
-    idArticulo INT FOREIGN KEY REFERENCES Articulos(id),
-    idUsuario INT FOREIGN KEY REFERENCES Usuarios(id),
-    comentario VARCHAR(1000) NOT NULL,
-    fechaComentario DATETIME DEFAULT GETDATE()
+-- Tabla ARTICLE_CATEGORIES
+CREATE TABLE ARTICLE_CATEGORIES (
+    id_article INT,
+    id_category INT,
+    PRIMARY KEY (id_article, id_category),
+    FOREIGN KEY (id_article) REFERENCES ARTICLES(id),
+    FOREIGN KEY (id_category) REFERENCES CATEGORIES(id)
 );
 
-
-CREATE TABLE RECURSOS (
-    id INT PRIMARY KEY IDENTITY(1,1),
-    titulo VARCHAR(255) NOT NULL,
-    descripcion VARCHAR(1000),
-    enlace VARCHAR(255),  -- Puede ser un enlace a un recurso externo
-    archivo VARCHAR(255), -- O un archivo alojado en el servidor
-    fechaPublicacion DATETIME DEFAULT GETDATE()
+-- Tabla ARTICLE_COAUTHORS
+CREATE TABLE ARTICLE_COAUTHORS (
+    id_article INT,
+    id_coauthor INT,
+    PRIMARY KEY (id_article, id_coauthor),
+    FOREIGN KEY (id_article) REFERENCES ARTICLES(id),
+    FOREIGN KEY (id_coauthor) REFERENCES USERS(id)
 );
 
+-- Tabla ARTICLE_VIEWS
+CREATE TABLE ARTICLE_VIEWS (
+    id_article INT,
+    id_user INT,
+    view_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id_article, id_user),
+    FOREIGN KEY (id_article) REFERENCES ARTICLES(id),
+    FOREIGN KEY (id_user) REFERENCES USERS(id)
+);
 
-CREATE TABLE VISTAS_ARTICULOS (
-    id INT PRIMARY KEY IDENTITY(1,1),
-    idArticulo INT FOREIGN KEY REFERENCES Articulos(id),
-    idUsuario INT FOREIGN KEY REFERENCES Usuarios(id),
-    fechaVista DATETIME DEFAULT GETDATE()
+-- Tabla RESEARCH_PROJECTS
+CREATE TABLE RESEARCH_PROJECTS (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    details TEXT,
+    vacancies INT,
+    preview_path VARCHAR(255),
+    status ENUM('active', 'inactive') DEFAULT 'active'
+);
+
+-- Tabla PROJECT_CATEGORIES
+CREATE TABLE PROJECT_CATEGORIES (
+    id_project INT,
+    id_category INT,
+    PRIMARY KEY (id_project, id_category),
+    FOREIGN KEY (id_project) REFERENCES RESEARCH_PROJECTS(id),
+    FOREIGN KEY (id_category) REFERENCES CATEGORIES(id)
+);
+
+-- Tabla RESOURCES
+CREATE TABLE RESOURCES (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    id_author INT,
+    resource_category ENUM('guias', 'talleres', 'convocatorias') NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    link VARCHAR(255),
+    pdf_path VARCHAR(255),
+    publication_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_author) REFERENCES USERS(id)
+);
+
+-- Tabla RESOURCE_COAUTHORS
+CREATE TABLE RESOURCE_COAUTHORS (
+    id_resource INT,
+    id_coauthor INT,
+    PRIMARY KEY (id_resource, id_coauthor),
+    FOREIGN KEY (id_resource) REFERENCES RESOURCES(id),
+    FOREIGN KEY (id_coauthor) REFERENCES USERS(id)
+);
+
+-- Tabla RESOURCE_CATEGORIES
+-- CREATE TABLE RESOURCE_CATEGORIES (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     category_name VARCHAR(100) UNIQUE NOT NULL
+-- );
+
+-- -- Tabla RESOURCE_CATEGORIES_MAP
+-- CREATE TABLE RESOURCE_CATEGORIES_MAP (
+--     id_resource INT,
+--     id_category INT,
+--     PRIMARY KEY (id_resource, id_category),
+--     FOREIGN KEY (id_resource) REFERENCES RESOURCES(id),
+--     FOREIGN KEY (id_category) REFERENCES RESOURCE_CATEGORIES(id)
+-- );
+
+-- Tabla QUESTIONS
+CREATE TABLE QUESTIONS (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    body TEXT NOT NULL,
+    id_user INT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_user) REFERENCES USERS(id)
+);
+
+-- Tabla ANSWERS
+CREATE TABLE ANSWERS (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    id_question INT,
+    body TEXT NOT NULL,
+    id_user INT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_question) REFERENCES QUESTIONS(id),
+    FOREIGN KEY (id_user) REFERENCES USERS(id)
 );

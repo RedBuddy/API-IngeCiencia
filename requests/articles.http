@@ -1,0 +1,42 @@
+@api = http://localhost:3000/articles
+
+### Consultar todos los articles
+GET {{api}}
+
+### Insertar articles
+POST {{api}}
+Content-Type: application/json
+
+{
+    "Id_author": 1,
+    "Title": "Título del Artículo",
+    "Abstract": "Resumen del artículo",
+    "Publication_date": "2024-09-24T00:00:00",
+    "Link": "http://example.com",
+    "Pdf_path": "/path/to/pdf",
+    "Preview_path": "/path/to/preview"
+  }
+
+
+### Consulta articles por ID
+GET {{api}}/1
+
+
+### Eliminar articles por Nombre
+DELETE {{api}}/1
+
+
+### Actualizar usuario
+PUT {{api}}/1
+Content-Type: application/json
+
+{
+   "id_author": 1, // ID del autor
+    "title": "Título Actualizado del Artículo",
+    "abstract": "Resumen actualizado del artículo",
+    "publication_date": "2024-09-24T00:00:00", // Formato ISO 8601
+    "link": "http://example.com/updated",
+    "pdf_path": "/path/to/updated_pdf",
+    "preview_path": "/path/to/updated_preview",
+    "status": "archived" // 'published' o 'archived'
+  }
