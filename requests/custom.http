@@ -1,0 +1,11 @@
+
+
+### Login de usuarios
+
+POST http://localhost:3000/login
+Content-Type: application/json
+
+{
+   "identifier": "pepe1",
+    "password": "webo123"
+  }

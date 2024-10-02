@@ -2,14 +2,16 @@
 
 ### Consultar todos los usuarios
 GET {{api}}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTUsInVzZXJuYW1lIjoicGVwZTEiLCJyb2xlX2lkIjoxLCJpYXQiOjE3Mjc4MzM1MTIsImV4cCI6MTcyNzgzNzExMn0.nZTUjNCrKvOv-YoXvLHxr-Us_eROKCQKskZP9cg1Q0c
 
 ### Insertar usuarios
 POST {{api}}
 Content-Type: application/json
 
+
 {
-   "Username": "DXASDSA",
-    "Email": "ADS@gmail.com",
+   "Username": "pepe1",
+    "Email": "pepe1@gmail.com",
     "Password": "webo123",
     "First_name": "Orlando",
     "Last_name": "Apodaca",
@@ -18,7 +20,7 @@ Content-Type: application/json
 
 
 ### Consulta usuarios por ID
-GET {{api}}/2
+GET {{api}}/15
 
 
 ### Eliminar usuarios por Nombre

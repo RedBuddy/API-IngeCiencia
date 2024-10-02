@@ -1,4 +1,55 @@
 import { getcon, query } from "../database";
+import bcrypt from 'bcryptjs';
+import { generateToken } from '../jwtconfig';
+
+// Autenticar usuario y generar un token JWT
+export const login_users = async (req, res) => {
+    const { identifier, password } = req.body; // Cambiamos email por identifier (puede ser email o username)
+
+    // Validación de campos
+    if (!identifier || !password) {
+        return res.status(400).json({ message: 'Por favor ingresa el nombre de usuario/email y la contraseña' });
+    }
+
+    try {
+        const connection = await getcon();
+
+        // Verificar si el identificador es un email o un nombre de usuario
+        let queryUser;
+        if (identifier.includes('@')) {
+            // Es un email
+            queryUser = query.select_users_byemail;
+        } else {
+            // Es un nombre de usuario
+            queryUser = query.select_users_byusername;
+        }
+
+        // Ejecutar la consulta adecuada
+        const [user] = await connection.execute(queryUser, [identifier]);
+
+        // Verificar si el usuario existe
+        if (user.length === 0) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        const foundUser = user[0];
+
+        // Verificar si la contraseña es correcta
+        const isPasswordValid = await bcrypt.compare(password, foundUser.password);
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: 'Contraseña incorrecta' });
+        }
+
+        // Generar un token JWT con los datos del usuario
+        const token = generateToken(foundUser);
+
+        res.json({ message: 'Autenticación exitosa', token });
+    } catch (error) {
+        console.error('Error al autenticar usuario:', error);
+        res.status(500).json({ message: 'Error interno del servidor' });
+    }
+};
+
 
 // Obtener todos los usuarios
 export const get_users = async (req, res) => {
@@ -21,17 +72,19 @@ export const post_users = async (req, res) => {
         return res.status(400).json({ message: 'Bad Request: Por favor llena todos los campos' });
     }
 
+    const hashedPassword = await bcrypt.hash(Password, 10);
+
     try {
         const connection = await getcon();
         const [result] = await connection.execute(query.insert_users, [
-            Username, Email, Password, First_name, Last_name, Profile_img_path
+            Username, Email, hashedPassword, First_name, Last_name, Profile_img_path
         ]);
 
         const userId = result.insertId;
         res.status(201).json({ id: userId }); // Establece el código de estado a 201 Created
     } catch (error) {
         console.error('Error al insertar usuario:', error); // Registra el error
-        res.status(500).json({ message: 'Error interno del servidor' });
+        res.status(500).json({ message: 'Error interno del servidor', error });
     }
 };
 

@@ -14,21 +14,16 @@ export const get_articles = async (req, res) => {
 
 // Insertar un nuevo artículo
 export const post_articles = async (req, res) => {
-    const { Id_author, Title, Abstract, Publication_date, Link, Pdf_path, Preview_path } = req.body;
+    const { id_author, title, abstract, publication_date, link, pdf_path, preview_path } = req.body;
 
-    // Validación de campos
-    if (!Id_author || !Title || !Publication_date || !Preview_path) {
+    if (!title || !abstract || !publication_date || !link || !pdf_path || !preview_path) {
         return res.status(400).json({ message: 'Bad Request: Por favor llena todos los campos' });
-    }
-
-    if (!Link && !Pdf_path) {
-        return res.status(400).json({ msj: 'Bad Request: Debe proporcionar al menos un enlace o un archivo PDF.' });
     }
 
     try {
         const connection = await getcon();
         const [result] = await connection.execute(query.insert_articles, [
-            Id_author, Title, Abstract, Publication_date, Link, Pdf_path, Preview_path
+            id_author, title, abstract, publication_date, link, pdf_path, preview_path
         ]);
 
         const articleId = result.insertId;
@@ -41,28 +36,25 @@ export const post_articles = async (req, res) => {
 
 // Actualizar artículo por ID
 export const update_articles = async (req, res) => {
-    const { Id_author, Title, Abstract, Publication_date, Link, Pdf_path, Preview_path, status } = req.body;
-    const { id } = req.params;
+    const { id_author, title, abstract, publication_date, link, pdf_path, preview_path } = req.body;
+    const { Id } = req.params;
 
-    // Validación de campos
-    if (!Id_author || !Title) {
-        return res.status(400).json({ message: 'Bad Request: Id_author y Title son campos obligatorios' });
+    if (!id_author || !title || !abstract || !publication_date || !link || !pdf_path || !preview_path) {
+        return res.status(400).json({ message: 'Bad Request: Por favor llena todos los campos' });
     }
 
     try {
         const connection = await getcon();
-
-        // Verificar si el artículo existe antes de actualizar
-        const [article] = await connection.execute(query.select_articles_byid, [id]);
+        const [article] = await connection.execute(query.select_articles_byid, [Id]);
         if (article.length === 0) {
             return res.status(404).json({ message: 'Artículo no encontrado' });
         }
 
         await connection.execute(query.update_articles_byid, [
-            Id_author, Title, Abstract, Publication_date, Link, Pdf_path, Preview_path, status, id,
+            id_author, title, abstract, publication_date, link, pdf_path, preview_path, Id
         ]);
 
-        res.json({ message: 'Artículo actualizado', article: { Id_author, Title, Abstract, Publication_date, Link, Pdf_path, Preview_path, status } });
+        res.json({ message: 'Artículo actualizado', article: { id_author, title, abstract, publication_date, link, pdf_path, preview_path } });
     } catch (error) {
         console.error('Error al actualizar artículo:', error);
         res.status(500).json({ message: 'Error interno del servidor' });
@@ -71,20 +63,17 @@ export const update_articles = async (req, res) => {
 
 // Eliminar artículo por ID
 export const delete_articles_byid = async (req, res) => {
-    const { id } = req.params;
+    const { Id } = req.params;
 
     try {
         const connection = await getcon();
-
-        // Verificar si el artículo existe
-        const [article] = await connection.execute(query.select_articles_byid, [id]);
+        const [article] = await connection.execute(query.select_articles_byid, [Id]);
         if (article.length === 0) {
             return res.status(404).json({ message: 'Artículo no encontrado' });
         }
 
-        // Si existe, proceder a eliminar
-        await connection.execute(query.delete_articles_byid, [id]);
-        res.sendStatus(204); // No Content
+        await connection.execute(query.delete_articles_byid, [Id]);
+        res.sendStatus(204);
     } catch (error) {
         console.error('Error al eliminar artículo:', error);
         res.status(500).json({ message: 'Error interno del servidor' });
@@ -93,11 +82,11 @@ export const delete_articles_byid = async (req, res) => {
 
 // Obtener artículo por ID
 export const get_articles_byid = async (req, res) => {
-    const { id } = req.params;
+    const { Id } = req.params;
 
     try {
         const connection = await getcon();
-        const [rows] = await connection.execute(query.select_articles_byid, [id]);
+        const [rows] = await connection.execute(query.select_articles_byid, [Id]);
         if (rows.length === 0) {
             return res.status(404).json({ message: 'Artículo no encontrado' });
         }
