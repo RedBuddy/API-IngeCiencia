@@ -5,8 +5,8 @@ const router = Router();
 
 router.get('/resources', get_resources);
 router.post('/resources', post_resources);
-router.put('/resources/:Id', update_resources);
-router.delete('/resources/:Id', delete_resources_byid);
-router.get('/resources/:Id', get_resources_byid);
+router.put('/resources/:id', update_resources);
+router.delete('/resources/:id', delete_resources_byid);
+router.get('/resources/:id', get_resources_byid);
 
 export default router;

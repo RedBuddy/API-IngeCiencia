@@ -1,96 +1,59 @@
-import { getcon, query } from "../database";
+import Resource from '../database/models/Resources';
+import { faker } from '@faker-js/faker';
 
-// Obtener todos los recursos
+export const post_resources = async (req, res) => {
+    try {
+        const newResource = await Resource.create({
+            id_author: req.body.id_author, // Asegúrate de que este ID existe en la tabla de usuarios
+            resource_category: faker.helpers.arrayElement(['guias', 'talleres', 'convocatorias']),
+            title: faker.commerce.productName(),
+            description: faker.lorem.paragraph(),
+            link: faker.internet.url(),
+            pdf_path: faker.system.filePath(),
+            publication_date: faker.date.past(),
+        });
+        res.status(201).json(newResource);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
 export const get_resources = async (req, res) => {
     try {
-        const connection = await getcon();
-        const [rows] = await connection.execute(query.select_resources);
-        res.json(rows);
+        const resources = await Resource.findAll();
+        res.status(200).json(resources);
     } catch (error) {
-        console.error('Error al obtener recursos:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
+        res.status(400).json({ error: error.message });
     }
 };
 
-// Insertar un nuevo recurso
-export const post_resources = async (req, res) => {
-    const { resource_name, resource_path, resource_type } = req.body;
-
-    if (!resource_name || !resource_path || !resource_type) {
-        return res.status(400).json({ message: 'Bad Request: Por favor llena todos los campos' });
-    }
-
-    try {
-        const connection = await getcon();
-        const [result] = await connection.execute(query.insert_resources, [
-            resource_name, resource_path, resource_type
-        ]);
-        const resourceId = result.insertId;
-        res.status(201).json({ id: resourceId });
-    } catch (error) {
-        console.error('Error al insertar recurso:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
-    }
-};
-
-// Actualizar recurso por ID
-export const update_resources = async (req, res) => {
-    const { resource_name, resource_path, resource_type } = req.body;
-    const { Id } = req.params;
-
-    if (!resource_name || !resource_path || !resource_type) {
-        return res.status(400).json({ message: 'Bad Request: Por favor llena todos los campos' });
-    }
-
-    try {
-        const connection = await getcon();
-        const [resource] = await connection.execute(query.select_resources_byid, [Id]);
-        if (resource.length === 0) {
-            return res.status(404).json({ message: 'Recurso no encontrado' });
-        }
-
-        await connection.execute(query.update_resources_byid, [
-            resource_name, resource_path, resource_type, Id
-        ]);
-        res.json({ message: 'Recurso actualizado', resource: { resource_name, resource_path, resource_type } });
-    } catch (error) {
-        console.error('Error al actualizar recurso:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
-    }
-};
-
-// Eliminar recurso por ID
-export const delete_resources_byid = async (req, res) => {
-    const { Id } = req.params;
-
-    try {
-        const connection = await getcon();
-        const [resource] = await connection.execute(query.select_resources_byid, [Id]);
-        if (resource.length === 0) {
-            return res.status(404).json({ message: 'Recurso no encontrado' });
-        }
-
-        await connection.execute(query.delete_resources_byid, [Id]);
-        res.sendStatus(204);
-    } catch (error) {
-        console.error('Error al eliminar recurso:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
-    }
-};
-
-// Obtener recurso por ID
 export const get_resources_byid = async (req, res) => {
-    const { Id } = req.params;
-
     try {
-        const connection = await getcon();
-        const [rows] = await connection.execute(query.select_resources_byid, [Id]);
-        if (rows.length === 0) {
-            return res.status(404).json({ message: 'Recurso no encontrado' });
-        }
-        res.json(rows[0]);
+        const resource = await Resource.findByPk(req.params.id);
+        if (!resource) return res.status(404).json({ message: 'Resource not found' });
+        res.status(200).json(resource);
     } catch (error) {
-        console.error('Error al obtener recurso por ID:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
+        res.status(400).json({ error: error.message });
+    }
+};
+
+export const update_resources = async (req, res) => {
+    try {
+        const [updated] = await Resource.update(req.body, { where: { id: req.params.id } });
+        if (!updated) return res.status(404).json({ message: 'Resource not found' });
+        const updatedResource = await Resource.findByPk(req.params.id);
+        res.status(200).json(updatedResource);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+export const delete_resources_byid = async (req, res) => {
+    try {
+        const deleted = await Resource.destroy({ where: { id: req.params.id } });
+        if (!deleted) return res.status(404).json({ message: 'Resource not found' });
+        res.status(204).json();
+    } catch (error) {
+        res.status(400).json({ error: error.message });
     }
 };

@@ -5,8 +5,8 @@ const router = Router();
 
 router.get('/answers', get_answers);
 router.post('/answers', post_answers);
-router.put('/answers/:Id', update_answers);
-router.delete('/answers/:Id', delete_answers_byid);
-router.get('/answers/:Id', get_answers_byid);
+router.put('/answers/:id', update_answers);
+router.delete('/answers/:id', delete_answers_byid);
+router.get('/answers/:id', get_answers_byid);
 
 export default router;

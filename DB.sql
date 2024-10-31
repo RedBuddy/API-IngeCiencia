@@ -21,6 +21,21 @@ CREATE TABLE USERS (
     FOREIGN KEY (role_id) REFERENCES ROLES(id)
 );
 
+CREATE TABLE PROFILE (
+    id_user INT PRIMARY KEY,
+    biography TEXT,
+    experience TEXT,
+    FOREIGN KEY (id_user) REFERENCES USERS(id)
+);
+
+CREATE TABLE USER_DISCIPLINES (
+    id_user INT,
+    id_category INT,
+    PRIMARY KEY (id_user, id_category),
+    FOREIGN KEY (id_user) REFERENCES USERS(id),
+    FOREIGN KEY (id_category) REFERENCES CATEGORIES(id)
+);
+
 -- Tabla ARTICLES
 CREATE TABLE ARTICLES (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -44,7 +59,7 @@ CREATE TABLE CATEGORIES (
 );
 
 -- Tabla ARTICLE_CATEGORIES
-CREATE TABLE ARTICLE_CATEGORIES (
+CREATE TABLE ARTICLE_CATEGORIES_MAP (
     id_article INT,
     id_category INT,
     PRIMARY KEY (id_article, id_category),
@@ -53,7 +68,7 @@ CREATE TABLE ARTICLE_CATEGORIES (
 );
 
 -- Tabla ARTICLE_COAUTHORS
-CREATE TABLE ARTICLE_COAUTHORS (
+CREATE TABLE ARTICLE_COAUTHORS_MAP (
     id_article INT,
     id_coauthor INT,
     PRIMARY KEY (id_article, id_coauthor),
@@ -82,7 +97,7 @@ CREATE TABLE RESEARCH_PROJECTS (
 );
 
 -- Tabla PROJECT_CATEGORIES
-CREATE TABLE PROJECT_CATEGORIES (
+CREATE TABLE PROJECT_CATEGORIES_MAP (
     id_project INT,
     id_category INT,
     PRIMARY KEY (id_project, id_category),
@@ -104,7 +119,7 @@ CREATE TABLE RESOURCES (
 );
 
 -- Tabla RESOURCE_COAUTHORS
-CREATE TABLE RESOURCE_COAUTHORS (
+CREATE TABLE RESOURCE_COAUTHORS_MAP (
     id_resource INT,
     id_coauthor INT,
     PRIMARY KEY (id_resource, id_coauthor),
@@ -136,6 +151,14 @@ CREATE TABLE QUESTIONS (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (id_user) REFERENCES USERS(id)
+);
+
+CREATE TABLE QUESTION_CATEGORIES_MAP (
+    id_question INT,
+    id_category INT,
+    PRIMARY KEY (id_question, id_category),
+    FOREIGN KEY (id_question) REFERENCES QUESTIONS(id),
+    FOREIGN KEY (id_category) REFERENCES CATEGORIES(id)
 );
 
 -- Tabla ANSWERS

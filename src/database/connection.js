@@ -1,23 +1,11 @@
-import mysql from 'mysql2/promise';
 import config from '../config';
+import { Sequelize } from 'sequelize';
 
-const dbsettings = {
+const sequelize = new Sequelize(config.DB_DATABASE, config.DB_USER, config.DB_PASSWORD, {
     host: config.DB_HOST,
-    user: config.DB_USER,
-    password: config.DB_PASSWORD,
+    dialect: 'mysql',
     port: config.DB_PORT,
-    database: config.DB_DATABASE,
-};
+    logging: false
+});
 
-export async function getcon() {
-    try {
-        const connection = await mysql.createConnection(dbsettings);
-        return connection;
-    } catch (error) {
-        console.error('Error al conectar con la base de datos:', error);
-    }
-}
-
-export { mysql };
-
-
+export default sequelize;

@@ -1,92 +1,53 @@
-import { getcon, query } from "../database";
+import ResourceCoauthor from '../database/models/ResourceCoauthorsMap';
 
-// Obtener todos los coautores de recursos
+export const post_resource_coauthors = async (req, res) => {
+    try {
+        const newCoauthor = await ResourceCoauthor.create({
+            id_resource: req.body.id_resource, // Asegúrate de que este ID existe en la tabla de recursos
+            id_coauthor: req.body.id_coauthor, // Asegúrate de que este ID existe en la tabla de usuarios
+        });
+        res.status(201).json(newCoauthor);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
 export const get_resource_coauthors = async (req, res) => {
     try {
-        const connection = await getcon();
-        const [rows] = await connection.execute(query.select_resource_coauthors);
-        res.json(rows);
+        const coauthors = await ResourceCoauthor.findAll();
+        res.status(200).json(coauthors);
     } catch (error) {
-        console.error('Error al obtener coautores de recursos:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
+        res.status(400).json({ error: error.message });
     }
 };
 
-// Insertar un nuevo coautor de recurso
-export const post_resource_coauthors = async (req, res) => {
-    const { id_resource, id_coauthor } = req.body;
-
-    if (!id_resource || !id_coauthor) {
-        return res.status(400).json({ message: 'Bad Request: Por favor llena todos los campos' });
-    }
-
-    try {
-        const connection = await getcon();
-        const [result] = await connection.execute(query.insert_resource_coauthors, [id_resource, id_coauthor]);
-        const resourceCoauthorId = result.insertId;
-        res.status(201).json({ id: resourceCoauthorId });
-    } catch (error) {
-        console.error('Error al insertar coautor de recurso:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
-    }
-};
-
-// Actualizar coautor de recurso por ID
-export const update_resource_coauthors = async (req, res) => {
-    const { id_resource, id_coauthor } = req.body;
-    const { Id } = req.params;
-
-    if (!id_resource || !id_coauthor) {
-        return res.status(400).json({ message: 'Bad Request: Por favor llena todos los campos' });
-    }
-
-    try {
-        const connection = await getcon();
-        const [resource_coauthor] = await connection.execute(query.select_resource_coauthors_byid, [Id]);
-        if (resource_coauthor.length === 0) {
-            return res.status(404).json({ message: 'Coautor de recurso no encontrado' });
-        }
-
-        await connection.execute(query.update_resource_coauthors_byid, [id_resource, id_coauthor, Id]);
-        res.json({ message: 'Coautor de recurso actualizado', coauthor: { id_resource, id_coauthor } });
-    } catch (error) {
-        console.error('Error al actualizar coautor de recurso:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
-    }
-};
-
-// Eliminar coautor de recurso por ID
-export const delete_resource_coauthors_byid = async (req, res) => {
-    const { Id } = req.params;
-
-    try {
-        const connection = await getcon();
-        const [resource_coauthor] = await connection.execute(query.select_resource_coauthors_byid, [Id]);
-        if (resource_coauthor.length === 0) {
-            return res.status(404).json({ message: 'Coautor de recurso no encontrado' });
-        }
-
-        await connection.execute(query.delete_resource_coauthors_byid, [Id]);
-        res.sendStatus(204);
-    } catch (error) {
-        console.error('Error al eliminar coautor de recurso:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
-    }
-};
-
-// Obtener coautor de recurso por ID
 export const get_resource_coauthors_byid = async (req, res) => {
-    const { Id } = req.params;
-
     try {
-        const connection = await getcon();
-        const [rows] = await connection.execute(query.select_resource_coauthors_byid, [Id]);
-        if (rows.length === 0) {
-            return res.status(404).json({ message: 'Coautor de recurso no encontrado' });
-        }
-        res.json(rows[0]);
+        const coauthor = await ResourceCoauthor.findByPk(req.params.id);
+        if (!coauthor) return res.status(404).json({ message: 'Coauthor not found' });
+        res.status(200).json(coauthor);
     } catch (error) {
-        console.error('Error al obtener coautor de recurso por ID:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
+        res.status(400).json({ error: error.message });
+    }
+};
+
+export const update_resource_coauthors = async (req, res) => {
+    try {
+        const [updated] = await ResourceCoauthor.update(req.body, { where: { id_resource: req.params.id_resource, id_coauthor: req.params.id_coauthor } });
+        if (!updated) return res.status(404).json({ message: 'Coauthor not found' });
+        const updatedCoauthor = await ResourceCoauthor.findOne({ where: { id_resource: req.params.id_resource, id_coauthor: req.params.id_coauthor } });
+        res.status(200).json(updatedCoauthor);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+export const delete_resource_coauthors_byid = async (req, res) => {
+    try {
+        const deleted = await ResourceCoauthor.destroy({ where: { id_resource: req.params.id_resource, id_coauthor: req.params.id_coauthor } });
+        if (!deleted) return res.status(404).json({ message: 'Coauthor not found' });
+        res.status(204).json();
+    } catch (error) {
+        res.status(400).json({ error: error.message });
     }
 };

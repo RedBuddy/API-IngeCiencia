@@ -1,92 +1,75 @@
-import { getcon, query } from "../database";
+import ArticleCoauthorsMap from '../database/models/ArticleCoauthorsMap';
+import Article from '../database/models/Articles';
+import User from '../database/models/Users';
 
-// Obtener todos los coautores de artículos
+export const post_article_coauthors = async (req, res) => {
+    try {
+        const { id_article, id_coauthor } = req.body;
+
+        // Verificar que el artículo y el coautor existan
+        const article = await Article.findByPk(id_article);
+        const coauthor = await User.findByPk(id_coauthor);
+
+        if (!article || !coauthor) {
+            return res.status(404).json({ message: 'Article or Coauthor not found' });
+        }
+
+        const newMapping = await ArticleCoauthorsMap.create({
+            id_article,
+            id_coauthor
+        });
+        res.status(201).json(newMapping);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
 export const get_article_coauthors = async (req, res) => {
     try {
-        const connection = await getcon();
-        const [rows] = await connection.execute(query.select_article_coauthors);
-        res.json(rows);
+        const mappings = await ArticleCoauthorsMap.findAll();
+        res.status(200).json(mappings);
     } catch (error) {
-        console.error('Error al obtener coautores:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
+        res.status(400).json({ error: error.message });
     }
 };
 
-// Insertar un nuevo coautor para un artículo
-export const post_article_coauthors = async (req, res) => {
-    const { id_article, id_coauthor } = req.body;
-
-    if (!id_article || !id_coauthor) {
-        return res.status(400).json({ message: 'Bad Request: Por favor llena todos los campos' });
-    }
-
-    try {
-        const connection = await getcon();
-        const [result] = await connection.execute(query.insert_article_coauthors, [id_article, id_coauthor]);
-        const coauthorId = result.insertId;
-        res.status(201).json({ id: coauthorId });
-    } catch (error) {
-        console.error('Error al insertar coautor:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
-    }
-};
-
-// Actualizar coautor por ID
-export const update_article_coauthors = async (req, res) => {
-    const { id_article, id_coauthor } = req.body;
-    const { Id } = req.params;
-
-    if (!id_article || !id_coauthor) {
-        return res.status(400).json({ message: 'Bad Request: Por favor llena todos los campos' });
-    }
-
-    try {
-        const connection = await getcon();
-        const [coauthor] = await connection.execute(query.select_article_coauthors_byid, [Id]);
-        if (coauthor.length === 0) {
-            return res.status(404).json({ message: 'Coautor no encontrado' });
-        }
-
-        await connection.execute(query.update_article_coauthors_byid, [id_article, id_coauthor, Id]);
-        res.json({ message: 'Coautor actualizado', coauthor: { id_article, id_coauthor } });
-    } catch (error) {
-        console.error('Error al actualizar coautor:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
-    }
-};
-
-// Eliminar coautor por ID
-export const delete_article_coauthors_byid = async (req, res) => {
-    const { Id } = req.params;
-
-    try {
-        const connection = await getcon();
-        const [coauthor] = await connection.execute(query.select_article_coauthors_byid, [Id]);
-        if (coauthor.length === 0) {
-            return res.status(404).json({ message: 'Coautor no encontrado' });
-        }
-
-        await connection.execute(query.delete_article_coauthors_byid, [Id]);
-        res.sendStatus(204);
-    } catch (error) {
-        console.error('Error al eliminar coautor:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
-    }
-};
-
-// Obtener coautor por ID
 export const get_article_coauthors_byid = async (req, res) => {
-    const { Id } = req.params;
-
     try {
-        const connection = await getcon();
-        const [rows] = await connection.execute(query.select_article_coauthors_byid, [Id]);
-        if (rows.length === 0) {
-            return res.status(404).json({ message: 'Coautor no encontrado' });
-        }
-        res.json(rows[0]);
+        const mapping = await ArticleCoauthorsMap.findByPk(req.params.id);
+        if (!mapping) return res.status(404).json({ message: 'Mapping not found' });
+        res.status(200).json(mapping);
     } catch (error) {
-        console.error('Error al obtener coautor por ID:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
+        res.status(400).json({ error: error.message });
+    }
+};
+
+export const update_article_coauthors = async (req, res) => {
+    try {
+        const { id_article, id_coauthor } = req.body;
+
+        // Verificar que el artículo y el coautor existan
+        const article = await Article.findByPk(id_article);
+        const coauthor = await User.findByPk(id_coauthor);
+
+        if (!article || !coauthor) {
+            return res.status(404).json({ message: 'Article or Coauthor not found' });
+        }
+
+        const [updated] = await ArticleCoauthorsMap.update(req.body, { where: { id_article: req.params.id_article, id_coauthor: req.params.id_coauthor } });
+        if (!updated) return res.status(404).json({ message: 'Mapping not found' });
+        const updatedMapping = await ArticleCoauthorsMap.findByPk(req.params.id);
+        res.status(200).json(updatedMapping);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+export const delete_article_coauthors_byid = async (req, res) => {
+    try {
+        const deleted = await ArticleCoauthorsMap.destroy({ where: { id_article: req.params.id_article, id_coauthor: req.params.id_coauthor } });
+        if (!deleted) return res.status(404).json({ message: 'Mapping not found' });
+        res.status(204).json();
+    } catch (error) {
+        res.status(400).json({ error: error.message });
     }
 };

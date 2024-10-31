@@ -1,92 +1,55 @@
-import { getcon, query } from "../database";
+import Answer from '../database/models/Answers';
+import { faker } from '@faker-js/faker';
 
-// Obtener todas las respuestas
+export const post_answers = async (req, res) => {
+    try {
+        const newAnswer = await Answer.create({
+            id_question: req.body.id_question, // Asegúrate de que este ID existe en la tabla de preguntas
+            body: faker.lorem.paragraph(), // Genera un cuerpo de respuesta aleatorio
+            id_user: req.body.id_user, // Asegúrate de que este ID existe en la tabla de usuarios
+        });
+        res.status(201).json(newAnswer);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
 export const get_answers = async (req, res) => {
     try {
-        const connection = await getcon();
-        const [rows] = await connection.execute(query.select_answers);
-        res.json(rows);
+        const answers = await Answer.findAll();
+        res.status(200).json(answers);
     } catch (error) {
-        console.error('Error al obtener respuestas:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
+        res.status(400).json({ error: error.message });
     }
 };
 
-// Insertar una nueva respuesta
-export const post_answers = async (req, res) => {
-    const { answer_text, id_question, id_user } = req.body;
-
-    if (!answer_text || !id_question || !id_user) {
-        return res.status(400).json({ message: 'Bad Request: Por favor llena todos los campos' });
-    }
-
-    try {
-        const connection = await getcon();
-        const [result] = await connection.execute(query.insert_answers, [answer_text, id_question, id_user]);
-        const answerId = result.insertId;
-        res.status(201).json({ id: answerId });
-    } catch (error) {
-        console.error('Error al insertar respuesta:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
-    }
-};
-
-// Actualizar respuesta por ID
-export const update_answers = async (req, res) => {
-    const { answer_text, id_question, id_user } = req.body;
-    const { Id } = req.params;
-
-    if (!answer_text || !id_question || !id_user) {
-        return res.status(400).json({ message: 'Bad Request: Por favor llena todos los campos' });
-    }
-
-    try {
-        const connection = await getcon();
-        const [answer] = await connection.execute(query.select_answers_byid, [Id]);
-        if (answer.length === 0) {
-            return res.status(404).json({ message: 'Respuesta no encontrada' });
-        }
-
-        await connection.execute(query.update_answers_byid, [answer_text, id_question, id_user, Id]);
-        res.json({ message: 'Respuesta actualizada', answer: { answer_text, id_question, id_user } });
-    } catch (error) {
-        console.error('Error al actualizar respuesta:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
-    }
-};
-
-// Eliminar respuesta por ID
-export const delete_answers_byid = async (req, res) => {
-    const { Id } = req.params;
-
-    try {
-        const connection = await getcon();
-        const [answer] = await connection.execute(query.select_answers_byid, [Id]);
-        if (answer.length === 0) {
-            return res.status(404).json({ message: 'Respuesta no encontrada' });
-        }
-
-        await connection.execute(query.delete_answers_byid, [Id]);
-        res.sendStatus(204);
-    } catch (error) {
-        console.error('Error al eliminar respuesta:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
-    }
-};
-
-// Obtener respuesta por ID
 export const get_answers_byid = async (req, res) => {
-    const { Id } = req.params;
-
     try {
-        const connection = await getcon();
-        const [rows] = await connection.execute(query.select_answers_byid, [Id]);
-        if (rows.length === 0) {
-            return res.status(404).json({ message: 'Respuesta no encontrada' });
-        }
-        res.json(rows[0]);
+        const answer = await Answer.findByPk(req.params.id);
+        if (!answer) return res.status(404).json({ message: 'Answer not found' });
+        res.status(200).json(answer);
     } catch (error) {
-        console.error('Error al obtener respuesta por ID:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
+        res.status(400).json({ error: error.message });
+    }
+};
+
+export const update_answers = async (req, res) => {
+    try {
+        const [updated] = await Answer.update(req.body, { where: { id: req.params.id } });
+        if (!updated) return res.status(404).json({ message: 'Answer not found' });
+        const updatedAnswer = await Answer.findByPk(req.params.id);
+        res.status(200).json(updatedAnswer);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+export const delete_answers_byid = async (req, res) => {
+    try {
+        const deleted = await Answer.destroy({ where: { id: req.params.id } });
+        if (!deleted) return res.status(404).json({ message: 'Answer not found' });
+        res.status(204).json();
+    } catch (error) {
+        res.status(400).json({ error: error.message });
     }
 };

@@ -5,8 +5,8 @@ const router = Router();
 
 router.get('/questions', get_questions);
 router.post('/questions', post_questions);
-router.put('/questions/:Id', update_questions);
-router.delete('/questions/:Id', delete_questions_byid);
-router.get('/questions/:Id', get_questions_byid);
+router.put('/questions/:id', update_questions);
+router.delete('/questions/:id', delete_questions_byid);
+router.get('/questions/:id', get_questions_byid);
 
 export default router;

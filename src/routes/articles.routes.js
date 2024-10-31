@@ -5,8 +5,8 @@ const router = Router();
 
 router.get('/articles', get_articles);
 router.post('/articles', post_articles);
-router.put('/articles/:Id', update_articles);
-router.delete('/articles/:Id', delete_articles_byid);
-router.get('/articles/:Id', get_articles_byid);
+router.put('/articles/:id', update_articles);
+router.delete('/articles/:id', delete_articles_byid);
+router.get('/articles/:id', get_articles_byid);
 
 export default router;

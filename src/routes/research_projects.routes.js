@@ -5,8 +5,8 @@ const router = Router();
 
 router.get('/research_projects', get_research_projects);
 router.post('/research_projects', post_research_projects);
-router.put('/research_projects/:Id', update_research_projects);
-router.delete('/research_projects/:Id', delete_research_projects_byid);
-router.get('/research_projects/:Id', get_research_projects_byid);
+router.put('/research_projects/:id', update_research_projects);
+router.delete('/research_projects/:id', delete_research_projects_byid);
+router.get('/research_projects/:id', get_research_projects_byid);
 
 export default router;

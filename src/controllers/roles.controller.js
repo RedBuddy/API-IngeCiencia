@@ -1,92 +1,53 @@
-import { getcon, query } from "../database";
+import Role from '../database/models/Roles';
 
-// Obtener todos los roles
+export const post_roles = async (req, res) => {
+    try {
+        const newRole = await Role.create({
+            name: req.body.name,
+            description: req.body.description
+        });
+        res.status(201).json(newRole);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
 export const get_roles = async (req, res) => {
     try {
-        const connection = await getcon();
-        const [rows] = await connection.execute(query.select_roles);
-        res.json(rows);
+        const roles = await Role.findAll();
+        res.status(200).json(roles);
     } catch (error) {
-        console.error('Error al obtener roles:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
+        res.status(400).json({ error: error.message });
     }
 };
 
-// Insertar un nuevo rol
-export const post_roles = async (req, res) => {
-    const { role_name } = req.body;
-
-    if (!role_name) {
-        return res.status(400).json({ message: 'Bad Request: Por favor ingresa el nombre del rol' });
-    }
-
-    try {
-        const connection = await getcon();
-        const [result] = await connection.execute(query.insert_roles, [role_name]);
-        const roleId = result.insertId;
-        res.status(201).json({ id: roleId });
-    } catch (error) {
-        console.error('Error al insertar rol:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
-    }
-};
-
-// Actualizar un rol por ID
-export const update_roles = async (req, res) => {
-    const { role_name } = req.body;
-    const { Id } = req.params;
-
-    if (!role_name) {
-        return res.status(400).json({ message: 'Bad Request: Por favor ingresa el nombre del rol' });
-    }
-
-    try {
-        const connection = await getcon();
-        const [role] = await connection.execute(query.select_roles_byid, [Id]);
-        if (role.length === 0) {
-            return res.status(404).json({ message: 'Rol no encontrado' });
-        }
-
-        await connection.execute(query.update_roles_byid, [role_name, Id]);
-        res.json({ message: 'Rol actualizado', role: { role_name } });
-    } catch (error) {
-        console.error('Error al actualizar rol:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
-    }
-};
-
-// Eliminar un rol por ID
-export const delete_roles_byid = async (req, res) => {
-    const { Id } = req.params;
-
-    try {
-        const connection = await getcon();
-        const [role] = await connection.execute(query.select_roles_byid, [Id]);
-        if (role.length === 0) {
-            return res.status(404).json({ message: 'Rol no encontrado' });
-        }
-
-        await connection.execute(query.delete_roles_byid, [Id]);
-        res.sendStatus(204);
-    } catch (error) {
-        console.error('Error al eliminar rol:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
-    }
-};
-
-// Obtener rol por ID
 export const get_roles_byid = async (req, res) => {
-    const { Id } = req.params;
-
     try {
-        const connection = await getcon();
-        const [rows] = await connection.execute(query.select_roles_byid, [Id]);
-        if (rows.length === 0) {
-            return res.status(404).json({ message: 'Rol no encontrado' });
-        }
-        res.json(rows[0]);
+        const role = await Role.findByPk(req.params.id);
+        if (!role) return res.status(404).json({ message: 'Role not found' });
+        res.status(200).json(role);
     } catch (error) {
-        console.error('Error al obtener rol por ID:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
+        res.status(400).json({ error: error.message });
+    }
+};
+
+export const update_roles = async (req, res) => {
+    try {
+        const [updated] = await Role.update(req.body, { where: { id: req.params.id } });
+        if (!updated) return res.status(404).json({ message: 'Role not found' });
+        const updatedRole = await Role.findByPk(req.params.id);
+        res.status(200).json(updatedRole);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+export const delete_roles_byid = async (req, res) => {
+    try {
+        const deleted = await Role.destroy({ where: { id: req.params.id } });
+        if (!deleted) return res.status(404).json({ message: 'Role not found' });
+        res.status(204).json();
+    } catch (error) {
+        res.status(400).json({ error: error.message });
     }
 };
