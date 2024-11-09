@@ -11,6 +11,7 @@ export const post_users = async (req, res) => {
             password: hashedPassword,
             first_name: faker.person.firstName(),
             last_name: faker.person.lastName(),
+            orcid: faker.internet.url(),
             profile_img_path: faker.image.avatar(),
         });
         res.status(201).json(newUser);

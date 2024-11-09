@@ -5,6 +5,10 @@ CREATE TABLE ROLES (
     role_name VARCHAR(50) UNIQUE NOT NULL
 );
 
+INSERT INTO roles (role_name) 
+VALUES ('lector'), ('investigador'), ('admin');
+
+
 -- Tabla USERS
 CREATE TABLE USERS (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -13,10 +17,11 @@ CREATE TABLE USERS (
     password VARCHAR(255) NOT NULL,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
+    orcid VARCHAR(30) NOT NULL,
     registration_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     profile_img_path VARCHAR(255),
     verified BOOLEAN DEFAULT 0,
-    role_id INT DEFAULT 1,
+    role_id INT DEFAULT 3,
     status ENUM('active', 'inactive') DEFAULT 'active',
     FOREIGN KEY (role_id) REFERENCES ROLES(id)
 );
@@ -42,6 +47,7 @@ CREATE TABLE ARTICLES (
     id_author INT,
     title VARCHAR(255) NOT NULL,
     abstract TEXT,
+    doi VARCHAR(50) NOT NULL,
     publication_date DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

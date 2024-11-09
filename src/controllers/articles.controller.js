@@ -7,6 +7,7 @@ export const post_articles = async (req, res) => {
         const newArticle = await Article.create({
             id_author: req.body.id_author,
             title: faker.lorem.sentence(),
+            doi: faker.internet.url(),
             abstract: faker.lorem.paragraph(),
             publication_date: faker.date.past(),
             link: faker.internet.url(),

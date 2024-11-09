@@ -18,6 +18,10 @@ Article.init({
         type: DataTypes.STRING(255),
         allowNull: false
     },
+    doi: {
+        type: DataTypes.STRING(50),
+        allowNull: false
+    },
     abstract: DataTypes.TEXT,
     publication_date: DataTypes.DATE,
     created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
