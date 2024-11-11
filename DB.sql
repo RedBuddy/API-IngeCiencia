@@ -6,7 +6,7 @@ CREATE TABLE ROLES (
 );
 
 INSERT INTO roles (role_name) 
-VALUES ('lector'), ('investigador'), ('admin');
+VALUES ('lector'), ('autor'), ('editor'), ('admin');
 
 
 -- Tabla USERS
@@ -21,7 +21,7 @@ CREATE TABLE USERS (
     registration_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     profile_img_path VARCHAR(255),
     verified BOOLEAN DEFAULT 0,
-    role_id INT DEFAULT 3,
+    role_id INT DEFAULT 1,
     status ENUM('active', 'inactive') DEFAULT 'active',
     FOREIGN KEY (role_id) REFERENCES ROLES(id)
 );

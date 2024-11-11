@@ -1,5 +1,4 @@
-
-import { getcon, query } from "../database"; // Importar la conexión a la base de datos y las consultas
+import Role from '../database/models/Roles'; // Asegúrate de tener un modelo de Roles
 
 export const verifyRoles = (...allowedRoles) => {
     return async (req, res, next) => {
@@ -11,17 +10,14 @@ export const verifyRoles = (...allowedRoles) => {
         }
 
         try {
-            // Conectar a la base de datos
-            const connection = await getcon();
-
             // Obtener el nombre del rol a partir del role_id
-            const [rows] = await connection.execute(query.select_role_byid, [role_id]);
+            const role = await Role.findByPk(role_id);
 
-            if (rows.length === 0) {
+            if (!role) {
                 return res.status(403).json({ message: 'Acceso denegado: Rol no encontrado' });
             }
 
-            const roleName = rows[0].role_name;
+            const roleName = role.role_name;
 
             // Verificar si el nombre del rol está en la lista de roles permitidos
             if (!allowedRoles.includes(roleName)) {

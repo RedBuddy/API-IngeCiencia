@@ -4,9 +4,9 @@ import bcrypt from 'bcrypt';
 
 export const post_users = async (req, res) => {
     try {
-        const hashedPassword = await bcrypt.hash(faker.internet.password(), 10);
+        const hashedPassword = await bcrypt.hash("123", 10);
         const newUser = await User.create({
-            username: faker.internet.username(),
+            username: "Orlando",
             email: faker.internet.email(),
             password: hashedPassword,
             first_name: faker.person.firstName(),
