@@ -17,6 +17,7 @@ import research_projects_routes from './routes/research_projects.routes'
 import resource_coauthors_routes from './routes/resource_coauthors.routes'
 import resources_routes from './routes/resources.routes'
 import roles_routes from './routes/roles.routes'
+import auth_routes from './routes/auth.routes'
 
 
 const app = express()
@@ -51,5 +52,6 @@ app.use(research_projects_routes)
 app.use(resource_coauthors_routes)
 app.use(resources_routes)
 app.use(roles_routes)
+app.use(auth_routes)
 
 export default app
