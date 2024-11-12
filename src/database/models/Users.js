@@ -33,10 +33,7 @@ User.init({
         type: DataTypes.STRING(50),
         allowNull: false
     },
-    orcid: {
-        type: DataTypes.STRING(30),
-        allowNull: false
-    },
+    orcid: DataTypes.STRING(30),
     registration_date: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW
