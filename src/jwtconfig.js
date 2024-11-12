@@ -11,7 +11,7 @@ export const generateToken = (user) => {
 };
 
 export const generateRefreshToken = (user) => {
-    return jwt.sign({ user_id: user.id }, JWT_REFRESH_SECRET, { expiresIn: '30d' });
+    return jwt.sign({ user_id: user.id }, JWT_REFRESH_SECRET, { expiresIn: '1d' });
 };
 
 // Función para verificar un token JWT
