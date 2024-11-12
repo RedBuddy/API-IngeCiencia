@@ -1,7 +1,7 @@
 import User from '../database/models/Users';
 import Role from '../database/models/Roles'; // Asegúrate de tener un modelo de Roles
 import bcrypt from 'bcrypt';
-import { generateToken, generateRefreshToken, verifyRefreshToken } from '../jwtconfig';
+import { generateToken, generateRefreshToken, verifyRefreshToken, invalidateRefreshToken } from '../jwtconfig';
 
 export const login_users = async (req, res) => {
     const { identifier, password } = req.body;
@@ -35,7 +35,7 @@ export const login_users = async (req, res) => {
 
         // Generar un token JWT y un refresh token con los datos del usuario
         const token = generateToken({ id: user.id, username: user.username, role_id: user.role_id });
-        const refreshToken = generateRefreshToken({ id: user.id });
+        const refreshToken = await generateRefreshToken({ id: user.id });
 
         res.json({ message: 'Autenticación exitosa', token, refreshToken });
     } catch (error) {
@@ -52,15 +52,21 @@ export const refresh_token = async (req, res) => {
     }
 
     try {
-        const decoded = verifyRefreshToken(refreshToken);
+        const decoded = await verifyRefreshToken(refreshToken);
         const user = await User.findByPk(decoded.user_id, { include: Role });
 
         if (!user) {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
 
+        // Invalidar el refresh token anterior
+        await invalidateRefreshToken(refreshToken);
+
+        // Generar nuevos tokens
         const newAccessToken = generateToken({ id: user.id, username: user.username, role_id: user.role_id });
-        res.json({ accessToken: newAccessToken });
+        const newRefreshToken = await generateRefreshToken({ id: user.id });
+
+        res.json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
     } catch (error) {
         console.error('Error al refrescar el token:', error);
         return res.status(401).json({ message: 'Refresh token inválido o expirado' });
