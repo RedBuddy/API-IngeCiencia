@@ -7,18 +7,18 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'your_jwt_refresh_s
 
 // Función para generar un token JWT
 export const generateToken = (user) => {
-    return jwt.sign({ user_id: user.id, username: user.username, role_id: user.role_id }, JWT_SECRET, { expiresIn: '1h' });
+    return jwt.sign(user, JWT_SECRET, { expiresIn: '2m' });
 };
 
 // Función para generar un refresh token
 export const generateRefreshToken = async (user) => {
-    const token = jwt.sign({ user_id: user.id }, JWT_REFRESH_SECRET, { expiresIn: '24h' });
+    const token = jwt.sign(user, JWT_REFRESH_SECRET, { expiresIn: '24h' });
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 1);
 
     await RefreshToken.create({
         token,
-        id_user: user.id,
+        id_user: user.user_id,
         expires_at: expiresAt,
     });
 

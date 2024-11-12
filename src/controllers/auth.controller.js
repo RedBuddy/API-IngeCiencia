@@ -34,8 +34,8 @@ export const login_users = async (req, res) => {
         }
 
         // Generar un token JWT y un refresh token con los datos del usuario
-        const token = generateToken({ id: user.id, username: user.username, role_id: user.role_id });
-        const refreshToken = await generateRefreshToken({ id: user.id });
+        const token = generateToken({ user_id: user.id, username: user.username, role: user.Role.role_name });
+        const refreshToken = await generateRefreshToken({ user_id: user.id });
 
         res.json({ message: 'Autenticación exitosa', token, refreshToken });
     } catch (error) {
@@ -63,8 +63,8 @@ export const refresh_token = async (req, res) => {
         await invalidateRefreshToken(refreshToken);
 
         // Generar nuevos tokens
-        const newAccessToken = generateToken({ id: user.id, username: user.username, role_id: user.role_id });
-        const newRefreshToken = await generateRefreshToken({ id: user.id });
+        const newAccessToken = generateToken({ user_id: user.id, username: user.username, role: user.Role.role_name });
+        const newRefreshToken = await generateRefreshToken({ user_id: user.id });
 
         res.json({ token: newAccessToken, refreshToken: newRefreshToken });
     } catch (error) {
