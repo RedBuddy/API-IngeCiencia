@@ -66,7 +66,7 @@ export const refresh_token = async (req, res) => {
         const newAccessToken = generateToken({ id: user.id, username: user.username, role_id: user.role_id });
         const newRefreshToken = await generateRefreshToken({ id: user.id });
 
-        res.json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
+        res.json({ token: newAccessToken, refreshToken: newRefreshToken });
     } catch (error) {
         console.error('Error al refrescar el token:', error);
         return res.status(401).json({ message: 'Refresh token inválido o expirado' });
