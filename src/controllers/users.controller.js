@@ -1,18 +1,20 @@
 import User from '../database/models/Users';
-import { faker } from '@faker-js/faker';
 import bcrypt from 'bcrypt';
 
 export const post_users = async (req, res) => {
     try {
-        const hashedPassword = await bcrypt.hash("123", 10);
+        const { username, email, password, first_name, last_name, orcid, profile_img_path, role_id, status } = req.body;
+        const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = await User.create({
-            username: "Orlando",
-            email: faker.internet.email(),
+            username,
+            email,
             password: hashedPassword,
-            first_name: faker.person.firstName(),
-            last_name: faker.person.lastName(),
-            orcid: faker.internet.url(),
-            profile_img_path: faker.image.avatar(),
+            first_name,
+            last_name,
+            orcid,
+            profile_img_path,
+            role_id,
+            status
         });
         res.status(201).json(newUser);
     } catch (error) {
@@ -41,7 +43,12 @@ export const get_users_byid = async (req, res) => {
 
 export const update_users = async (req, res) => {
     try {
-        const [updated] = await User.update(req.body, { where: { id: req.params.id } });
+        const { username, email, password, first_name, last_name, orcid, profile_img_path, role_id, status } = req.body;
+        const updateData = { username, email, first_name, last_name, orcid, profile_img_path, role_id, status };
+        if (password) {
+            updateData.password = await bcrypt.hash(password, 10);
+        }
+        const [updated] = await User.update(updateData, { where: { id: req.params.id } });
         if (!updated) return res.status(404).json({ message: 'User not found' });
         const updatedUser = await User.findByPk(req.params.id);
         res.status(200).json(updatedUser);
@@ -59,7 +66,3 @@ export const delete_users_byid = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
-
-
-
-
