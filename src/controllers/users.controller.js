@@ -13,6 +13,17 @@ export const post_users = [
             const { username, email, password, first_name, last_name, orcid, role_id, status } = req.body;
             const profile_img = req.file ? req.file.buffer : null; // Obtener la imagen de perfil del archivo subido
 
+            // Verificar si el username o email ya existen
+            const existingUser = await User.findOne({ where: { username } });
+            if (existingUser) {
+                return res.status(400).json({ message: 'El nombre de usuario ya está en uso' });
+            }
+
+            const existingEmail = await User.findOne({ where: { email } });
+            if (existingEmail) {
+                return res.status(400).json({ message: 'El correo electrónico ya está en uso' });
+            }
+
             // Encriptar la contraseña
             const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -29,7 +40,7 @@ export const post_users = [
                 status
             });
 
-            res.status(201).json(newUser);
+            res.status(201).json({ id: newUser.id, message: 'Usuario creado exitosamente' });
         } catch (error) {
             res.status(400).json({ error: error.message });
         }
