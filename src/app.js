@@ -1,5 +1,6 @@
 import express from 'express'
 import config from './config'
+import cors from 'cors'
 
 import users_routes from './routes/users.routes'
 import profile_routes from './routes/profile.routes'
@@ -29,12 +30,14 @@ app.set('PORT', config.PORT)
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
-  next();
-});
+// app.use((req, res, next) => {
+//   res.header('Access-Control-Allow-Origin', '*');
+//   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+//   res.header('Access-Control-Allow-Headers', 'Content-Type');
+//   next();
+// });
+
+app.use(cors());
 
 app.use(users_routes)
 app.use(profile_routes)

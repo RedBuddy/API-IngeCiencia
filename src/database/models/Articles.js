@@ -27,8 +27,14 @@ Article.init({
     created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updated_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     link: DataTypes.STRING(255),
-    pdf_path: DataTypes.STRING(255),
-    preview_path: DataTypes.STRING(255),
+    pdf: {
+        type: DataTypes.BLOB('long'), 
+        allowNull: true
+    },
+    preview_img: {
+        type: DataTypes.BLOB('medium'), 
+        allowNull: true
+    },
     status: {
         type: DataTypes.ENUM('published', 'archived'),
         defaultValue: 'published'

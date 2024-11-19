@@ -33,13 +33,16 @@ User.init({
         type: DataTypes.STRING(50),
         allowNull: false
     },
-    orcid: DataTypes.STRING(30),
+    orcid: {
+        type: DataTypes.STRING(30),
+        allowNull: true
+    },
     registration_date: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW
     },
-    profile_img_path: {
-        type: DataTypes.STRING(255),
+    profile_img: {
+        type: DataTypes.BLOB('medium'), 
         allowNull: true
     },
     verified: {

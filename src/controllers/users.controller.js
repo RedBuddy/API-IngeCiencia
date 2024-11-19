@@ -1,22 +1,81 @@
 import User from '../database/models/Users';
 import bcrypt from 'bcrypt';
+import multer from 'multer';
 
-export const post_users = async (req, res) => {
+// Configurar multer para manejar la subida de archivos
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+export const post_users = [
+    upload.single('profile_img'), // Middleware para manejar la subida de la imagen de perfil
+    async (req, res) => {
+        try {
+            const { username, email, password, first_name, last_name, orcid, role_id, status } = req.body;
+            const profile_img = req.file ? req.file.buffer : null; // Obtener la imagen de perfil del archivo subido
+
+            // Encriptar la contraseña
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            // Crear el nuevo usuario
+            const newUser = await User.create({
+                username,
+                email,
+                password: hashedPassword,
+                first_name,
+                last_name,
+                orcid,
+                profile_img, // Almacenar la imagen de perfil en la base de datos
+                role_id,
+                status
+            });
+
+            res.status(201).json(newUser);
+        } catch (error) {
+            res.status(400).json({ error: error.message });
+        }
+    }
+];
+
+// Función para subir la imagen de perfil de un usuario existente
+export const post_user_img = [
+    upload.single('profile_img'), // Middleware para manejar la subida de la imagen de perfil
+    async (req, res) => {
+        try {
+            const profile_img = req.file ? req.file.buffer : null; // Obtener la imagen de perfil del archivo subido
+
+            if (!profile_img) {
+                return res.status(400).json({ message: 'No se proporcionó una imagen' });
+            }
+
+            const [updated] = await User.update({ profile_img }, {
+                where: { id: req.params.id }
+            });
+
+            if (!updated) {
+                return res.status(404).json({ message: 'Usuario no encontrado' });
+            }
+            
+            // const updatedUser = await User.findByPk(req.params.id);
+            res.status(202).json({ message: 'Imagen de perfil actualizada' });
+        } catch (error) {
+            res.status(400).json({ error: error.message });
+        }
+    }
+];
+
+// Función para obtener la imagen de perfil de un usuario
+export const get_user_img = async (req, res) => {
     try {
-        const { username, email, password, first_name, last_name, orcid, profile_img_path, role_id, status } = req.body;
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = await User.create({
-            username,
-            email,
-            password: hashedPassword,
-            first_name,
-            last_name,
-            orcid,
-            profile_img_path,
-            role_id,
-            status
+        const user = await User.findByPk(req.params.id, {
+            attributes: ['profile_img']
         });
-        res.status(201).json(newUser);
+
+        if (!user || !user.profile_img) {
+            return res.status(404).json({ message: 'Imagen no encontrada' });
+        }
+
+        res.set('Content-Type', 'image/jpeg'); // Ajusta el tipo de contenido según el formato de la imagen
+        res.send(user.profile_img);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -41,27 +100,58 @@ export const get_users_byid = async (req, res) => {
     }
 };
 
-export const update_users = async (req, res) => {
-    try {
-        const { username, email, password, first_name, last_name, orcid, profile_img_path, role_id, status } = req.body;
-        const updateData = { username, email, first_name, last_name, orcid, profile_img_path, role_id, status };
-        if (password) {
-            updateData.password = await bcrypt.hash(password, 10);
+export const update_users = [
+    upload.single('profile_img'), // Middleware para manejar la subida de la imagen de perfil
+    async (req, res) => {
+        try {
+            const { username, email, password, first_name, last_name, orcid, role_id, status } = req.body;
+            const profile_img = req.file ? req.file.buffer : null; // Obtener la imagen de perfil del archivo subido
+
+            const updateData = {
+                username,
+                email,
+                first_name,
+                last_name,
+                orcid,
+                role_id,
+                status
+            };
+
+            if (password) {
+                updateData.password = await bcrypt.hash(password, 10);
+            }
+
+            if (profile_img) {
+                updateData.profile_img = profile_img;
+            }
+
+            const [updated] = await User.update(updateData, {
+                where: { id: req.params.id }
+            });
+
+            if (!updated) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+
+            const updatedUser = await User.findByPk(req.params.id);
+            res.status(200).json(updatedUser);
+        } catch (error) {
+            res.status(400).json({ error: error.message });
         }
-        const [updated] = await User.update(updateData, { where: { id: req.params.id } });
-        if (!updated) return res.status(404).json({ message: 'User not found' });
-        const updatedUser = await User.findByPk(req.params.id);
-        res.status(200).json(updatedUser);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
     }
-};
+];
 
 export const delete_users_byid = async (req, res) => {
     try {
-        const deleted = await User.destroy({ where: { id: req.params.id } });
-        if (!deleted) return res.status(404).json({ message: 'User not found' });
-        res.status(204).json();
+        const deleted = await User.destroy({
+            where: { id: req.params.id }
+        });
+
+        if (!deleted) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(204).json({ message: 'User deleted' });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

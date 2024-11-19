@@ -19,7 +19,7 @@ CREATE TABLE USERS (
     last_name VARCHAR(50) NOT NULL,
     orcid VARCHAR(30),
     registration_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    profile_img_path VARCHAR(255),
+    profile_img MEDIUMBLOB, -- Campo para almacenar la imagen de perfil
     verified BOOLEAN DEFAULT 0,
     role_id INT DEFAULT 1,
     status ENUM('active', 'inactive') DEFAULT 'active',
@@ -52,8 +52,8 @@ CREATE TABLE ARTICLES (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     link VARCHAR(255),
-    pdf_path VARCHAR(255),
-    preview_path VARCHAR(255),
+    pdf LONGBLOB,
+    preview_img MEDIUMBLOB,
     status ENUM('published', 'archived') DEFAULT 'published',
     FOREIGN KEY (id_author) REFERENCES USERS(id)
 );
@@ -98,7 +98,7 @@ CREATE TABLE RESEARCH_PROJECTS (
     title VARCHAR(255) NOT NULL,
     details TEXT,
     vacancies INT,
-    preview_path VARCHAR(255),
+    preview_img MEDIUMBLOB,
     status ENUM('active', 'inactive') DEFAULT 'active'
 );
 
@@ -119,7 +119,7 @@ CREATE TABLE RESOURCES (
     title VARCHAR(255) NOT NULL,
     description TEXT,
     link VARCHAR(255),
-    pdf_path VARCHAR(255),
+    pdf LONGBLOB,
     publication_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_author) REFERENCES USERS(id)
 );
