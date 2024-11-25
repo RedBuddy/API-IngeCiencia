@@ -115,21 +115,37 @@ export const update_users = [
     upload.single('profile_img'), // Middleware para manejar la subida de la imagen de perfil
     async (req, res) => {
         try {
-            const { username, email, password, first_name, last_name, orcid, role_id, status } = req.body;
+            const { first_name, last_name, email, current_password, new_password } = req.body;
             const profile_img = req.file ? req.file.buffer : null; // Obtener la imagen de perfil del archivo subido
 
+            const user = await User.findByPk(req.params.id);
+
+            if (!user) {
+                return res.status(404).json({ message: 'Usuario no encontrado' });
+            }
+
+            // Verificar la contraseña actual
+            const isPasswordValid = await bcrypt.compare(current_password, user.password);
+            if (!isPasswordValid) {
+                return res.status(400).json({ message: 'Contraseña actual incorrecta' });
+            }
+
             const updateData = {
-                username,
-                email,
                 first_name,
-                last_name,
-                orcid,
-                role_id,
-                status
+                last_name
             };
 
-            if (password) {
-                updateData.password = await bcrypt.hash(password, 10);
+            // Verificar si el nuevo email ya está en uso por otro usuario
+            if (email && email !== user.email) {
+                const existingEmail = await User.findOne({ where: { email } });
+                if (existingEmail) {
+                    return res.status(400).json({ message: 'El correo electrónico ya está en uso' });
+                }
+                updateData.email = email;
+            }
+
+            if (new_password) {
+                updateData.password = await bcrypt.hash(new_password, 10);
             }
 
             if (profile_img) {
@@ -141,16 +157,17 @@ export const update_users = [
             });
 
             if (!updated) {
-                return res.status(404).json({ message: 'User not found' });
+                return res.status(404).json({ message: 'Error al actualizar usuario' });
             }
 
             const updatedUser = await User.findByPk(req.params.id);
-            res.status(200).json(updatedUser);
+            res.status(200).json({message: 'Usuario actualizado exitosamente'});
         } catch (error) {
             res.status(400).json({ error: error.message });
         }
     }
 ];
+
 
 export const delete_users_byid = async (req, res) => {
     try {

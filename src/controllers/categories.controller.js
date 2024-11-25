@@ -1,12 +1,14 @@
 import Category from '../database/models/Categories';
-import { faker } from '@faker-js/faker';
 
 export const post_categories = async (req, res) => {
     try {
+        const { category_name } = req.body;
+
+        // Crear la nueva categoría
         const newCategory = await Category.create({
-            name: faker.commerce.department(),
-            description: faker.lorem.sentence(),
+            category_name
         });
+
         res.status(201).json(newCategory);
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -34,14 +36,19 @@ export const get_categories_byid = async (req, res) => {
 
 export const update_categories = async (req, res) => {
     try {
-        const [updated] = await Category.update(req.body, { where: { id: req.params.id } });
+        const { category_name } = req.body;
+
+        const [updated] = await Category.update({ category_name }, { where: { id: req.params.id } });
         if (!updated) return res.status(404).json({ message: 'Category not found' });
+
         const updatedCategory = await Category.findByPk(req.params.id);
         res.status(200).json(updatedCategory);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 };
+
+
 
 export const delete_categories_byid = async (req, res) => {
     try {

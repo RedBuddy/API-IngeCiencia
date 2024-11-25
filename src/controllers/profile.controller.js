@@ -1,14 +1,17 @@
 import Profile from '../database/models/Profile';
 import User from '../database/models/Users';
-import { faker } from '@faker-js/faker';
 
 export const post_profile = async (req, res) => {
     try {
+        const { id_user, biography, experience } = req.body;
+
+        // Crear el nuevo perfil
         const newProfile = await Profile.create({
-            id_user: req.body.id_user,
-            biography: faker.lorem.paragraph(),
-            experience: faker.lorem.paragraphs(2)
+            id_user,
+            biography,
+            experience
         });
+
         res.status(201).json(newProfile);
     } catch (error) {
         res.status(400).json({ error: error.message });
