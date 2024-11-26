@@ -190,3 +190,26 @@ CREATE TABLE RefreshTokens (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (id_user) REFERENCES USERS(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+
+INSERT INTO CATEGORIES (category_name) VALUES
+('Desarrollo de Software'),
+('Inteligencia Artificial y Machine Learning'),
+('Tecnologías Web y Móviles'),
+('Sistemas de Información Geográfica (SIG)'),
+('Construcción Sostenible'),
+('Diseño Estructural'),
+('Gestión de Proyectos de Construcción'),
+('Ingeniería de Materiales'),
+('Procesos de Manufactura'),
+('Optimización de Procesos Industriales'),
+('Energías Renovables'),
+('Gestión de Recursos Naturales'),
+('Cartografía y Topografía'),
+('Geomática Avanzada'),
+('Ingeniería Sísmica y Geotécnica'),
+('Simulación de Procesos Industriales'),
+('Automatización y Control'),
+('IoT (Internet de las Cosas) para la Industria'),
+('Ciencia de Datos y Big Data'),
+('Innovación y Emprendimiento Tecnológico');

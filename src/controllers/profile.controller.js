@@ -42,8 +42,16 @@ export const get_profile_byid = async (req, res) => {
 
 export const update_profile = async (req, res) => {
     try {
-        const [updated] = await Profile.update(req.body, { where: { id_user: req.params.id } });
-        if (!updated) return res.status(404).json({ message: 'Profile not found' });
+        const profile = await Profile.findOne({ where: { id_user: req.params.id } });
+
+        if (!profile) {
+            return res.status(404).json({ message: 'Profile not found' });
+        }
+
+        await Profile.update(req.body, {
+            where: { id_user: req.params.id }
+        });
+
         const updatedProfile = await Profile.findOne({
             where: { id_user: req.params.id },
             include: User
