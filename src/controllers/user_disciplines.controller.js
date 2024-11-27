@@ -56,7 +56,7 @@ export const get_user_disciplines_byid = async (req, res) => {
             ]
         });
 
-        if (!userDisciplines.length) return res.status(404).json({ message: 'User disciplines not found' });
+        // if (!userDisciplines.length) return res.status(404).json({ message: 'User disciplines not found' });
 
         const result = {
             id_user: req.params.id,
@@ -70,19 +70,34 @@ export const get_user_disciplines_byid = async (req, res) => {
 };
 
 export const update_user_disciplines = async (req, res) => {
+    const { id_user, id_categories } = req.body;
+
     try {
-        const [updated] = await UserDiscipline.update(req.body, {
-            where: { id_user: req.params.id, id_category: req.body.id_category }
+        // Eliminar todas las disciplinas actuales del usuario
+        await UserDiscipline.destroy({
+            where: { id_user }
         });
-        if (!updated) return res.status(404).json({ message: 'User discipline not found' });
-        const updatedUserDiscipline = await UserDiscipline.findOne({
-            where: { id_user: req.params.id, id_category: req.body.id_category },
+
+        // Crear nuevas entradas para las disciplinas proporcionadas
+        const newUserDisciplines = await Promise.all(
+            id_categories.map(async (id_category) => {
+                return await UserDiscipline.create({
+                    id_user,
+                    id_category
+                });
+            })
+        );
+
+        // Obtener las disciplinas actualizadas del usuario
+        const updatedUserDisciplines = await UserDiscipline.findAll({
+            where: { id_user },
             include: [
                 { model: User, attributes: ['username', 'email'] },
                 { model: Category, attributes: ['category_name'] }
             ]
         });
-        res.status(200).json(updatedUserDiscipline);
+
+        res.status(200).json(updatedUserDisciplines);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
