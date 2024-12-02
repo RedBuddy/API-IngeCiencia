@@ -1,6 +1,7 @@
 import Article from '../database/models/Articles';
 import User from '../database/models/Users';
 import multer from 'multer';
+import { Op } from 'sequelize';
 
 // Configurar multer para manejar la subida de archivos
 const storage = multer.memoryStorage();
@@ -39,17 +40,7 @@ export const post_articles = [
 
 export const get_articles = async (req, res) => {
     try {
-        const articles = await Article.findAll({
-            attributes: ['id', 'id_author', 'title', 'doi', 'abstract', 'publication_date', 'link', 'status'],
-            include: [
-                {
-                    model: User,
-                    as: 'ArticleCoauthors',
-                    attributes: ['username', 'profile_img'],
-                    through: { attributes: [] } // Excluir atributos de la tabla de mapeo
-                }
-            ]
-        });
+        const articles = await Article.findAll({ });
         res.status(200).json(articles);
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -165,6 +156,37 @@ export const delete_articles_byid = async (req, res) => {
         const deleted = await Article.destroy({ where: { id: req.params.id } });
         if (!deleted) return res.status(404).json({ message: 'Article not found' });
         res.status(204).json();
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+
+export const filter_articles = async (req, res) => {
+    try {
+        const searchString = req.params.searchString;
+
+        const articles = await Article.findAll({
+            where: {
+                [Op.or]: [
+                    { title: { [Op.like]: `%${searchString}%` } },
+                    { abstract: { [Op.like]: `%${searchString}%` } }
+                ]
+            }
+            // attributes: ['id', 'id_author', 'title', 'doi', 'abstract', 'publication_date', 'link', 'status'],
+            // include: [
+            //     {
+            //         model: User,
+            //         attributes: ['username', 'first_name', 'last_name']
+            //     }
+            // ]
+        });
+
+        if (!articles.length) {
+            return res.status(404).json({ message: 'Articles not found' });
+        }
+
+        res.status(200).json(articles);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

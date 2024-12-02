@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { get_users, post_users, update_users, delete_users_byid, get_users_byid, post_user_img, get_user_img,get_authors } from "../controllers/users.controller"
+import { get_users, post_users, update_users, delete_users_byid, get_users_byid, post_user_img, get_user_img,get_authors, get_user_details } from "../controllers/users.controller"
 import { verifyJwtToken } from '../middlewares/auth_middleware';
 import { verifyRoles } from '../middlewares/role_middleware';
 
@@ -16,5 +16,7 @@ router.post('/users/profile_img/:id', post_user_img);
 router.get('/users/profile_img/:id', get_user_img); 
 //Autores
  router.get('/authors', get_authors);
+//Detalles de usuario
+router.get('/user_filter/:searchString', get_user_details);
 
 export default router;

@@ -23,7 +23,8 @@ UserDiscipline.init({
     timestamps: false
 });
 
-User.belongsToMany(Category, { through: UserDiscipline, foreignKey: 'id_user' });
-Category.belongsToMany(User, { through: UserDiscipline, foreignKey: 'id_category' });
+User.hasMany(UserDiscipline, { foreignKey: 'id_user' });
+UserDiscipline.belongsTo(User, { foreignKey: 'id_user' });
+UserDiscipline.belongsTo(Category, { foreignKey: 'id_category' });
 
 export default UserDiscipline;

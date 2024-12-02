@@ -28,6 +28,7 @@ CREATE TABLE USERS (
 
 CREATE TABLE PROFILE (
     id_user INT PRIMARY KEY,
+    --faculty VARCHAR(100),
     biography TEXT,
     experience TEXT,
     FOREIGN KEY (id_user) REFERENCES USERS(id)

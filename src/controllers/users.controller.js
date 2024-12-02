@@ -1,7 +1,12 @@
 import User from '../database/models/Users';
 import Role from '../database/models/Roles';
+import UserDiscipline from '../database/models/UserDisciplines';
+import Article from '../database/models/Articles';
+import Category from '../database/models/Categories';
+import Profile from '../database/models/Profile';
 import bcrypt from 'bcrypt';
 import multer from 'multer';
+import { Op } from 'sequelize';
 
 // Configurar multer para manejar la subida de archivos
 const storage = multer.memoryStorage();
@@ -200,6 +205,56 @@ export const get_authors = async (req, res) => {
         });
 
         res.status(200).json(authors);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+
+export const get_user_details = async (req, res) => {
+    try {
+        const searchString = req.params.searchString;
+
+        const users = await User.findAll({
+            where: {
+                [Op.or]: [
+                    { first_name: { [Op.like]: `%${searchString}%` } },
+                    { last_name: { [Op.like]: `%${searchString}%` } }
+                ]
+            },
+            attributes: ['id', 'first_name', 'last_name', 'profile_img'],
+            include: [
+                {
+                    model: UserDiscipline,
+                    attributes: ['id_category'],
+                    include: {
+                        model: Category,
+                        attributes: ['category_name']
+                    }
+                }
+            ]
+        });
+
+        if (!users.length) {
+            return res.status(404).json({ message: 'Users not found' });
+        }
+
+        const result = await Promise.all(users.map(async (user) => {
+            const publicationsCount = await Article.count({
+                where: { id_author: user.id }
+            });
+
+            return {
+                id: user.id,
+                first_name: user.first_name,
+                last_name: user.last_name,
+                profile_img: user.profile_img,
+                user_disciplines: user.UserDisciplines.map(discipline => discipline.Category.category_name),
+                publications_count: publicationsCount
+            };
+        }));
+
+        res.status(200).json(result);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

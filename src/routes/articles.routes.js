@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { get_articles, post_articles, update_articles, delete_articles_byid, get_articles_byid, get_articles_by_userid, get_article_pdf, get_article_preview_img } from "../controllers/articles.controller"
+import { get_articles, post_articles, update_articles, delete_articles_byid, get_articles_byid, get_articles_by_userid, get_article_pdf, get_article_preview_img, filter_articles } from "../controllers/articles.controller"
 
 const router = Router();
 
@@ -12,5 +12,7 @@ router.get('/articles/user_id/:id', get_articles_by_userid);
 //Imagenes 
 router.get('/articles/pdf/:id', get_article_pdf); 
 router.get('/articles/preview_img/:id', get_article_preview_img); 
+//Filtra los articulos por titulo o abstract
+router.get('/article_filter/:searchString', filter_articles);
 
 export default router;
