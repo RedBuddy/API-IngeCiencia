@@ -23,7 +23,8 @@ ArticleCoauthor.init({
     timestamps: false
 });
 
-Article.belongsToMany(User, { through: ArticleCoauthor, foreignKey: 'id_article' });
-User.belongsToMany(Article, { through: ArticleCoauthor, foreignKey: 'id_coauthor' });
+// Configurar las asociaciones con alias únicos
+Article.belongsToMany(User, { through: ArticleCoauthor, foreignKey: 'id_article', as: 'ArticleCoauthors' });
+User.belongsToMany(Article, { through: ArticleCoauthor, foreignKey: 'id_coauthor', as: 'UserArticles' });
 
 export default ArticleCoauthor;

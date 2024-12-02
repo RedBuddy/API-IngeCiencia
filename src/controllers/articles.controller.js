@@ -40,10 +40,15 @@ export const post_articles = [
 export const get_articles = async (req, res) => {
     try {
         const articles = await Article.findAll({
-            include: {
-                model: User,
-                attributes: ['username', 'email']
-            }
+            attributes: ['id', 'id_author', 'title', 'doi', 'abstract', 'publication_date', 'link', 'status'],
+            include: [
+                {
+                    model: User,
+                    as: 'ArticleCoauthors',
+                    attributes: ['username', 'profile_img'],
+                    through: { attributes: [] } // Excluir atributos de la tabla de mapeo
+                }
+            ]
         });
         res.status(200).json(articles);
     } catch (error) {
@@ -53,18 +58,29 @@ export const get_articles = async (req, res) => {
 
 export const get_articles_byid = async (req, res) => {
     try {
-        const article = await Article.findByPk(req.params.id, {
-            include: {
-                model: User,
-                attributes: ['username', 'email']
-            }
-        });
+        const article = await Article.findByPk(req.params.id, {});
 
         if (!article) {
             return res.status(404).json({ message: 'Artículo no encontrado' });
         }
 
         res.status(200).json(article);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+export const get_articles_by_userid = async (req, res) => {
+    try {
+        const articles = await Article.findAll({
+            where: { id_author: req.params.id }
+        });
+
+        if (!articles.length) {
+            return res.status(404).json({ message: 'No articles found for this user' });
+        }
+
+        res.status(200).json(articles);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -106,16 +122,43 @@ export const get_article_preview_img = async (req, res) => {
     }
 };
 
-export const update_articles = async (req, res) => {
-    try {
-        const [updated] = await Article.update(req.body, { where: { id: req.params.id } });
-        if (!updated) return res.status(404).json({ message: 'Article not found' });
-        const updatedArticle = await Article.findByPk(req.params.id);
-        res.status(200).json(updatedArticle);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
+export const update_articles = [
+    upload.fields([
+        { name: 'pdf', maxCount: 1 },
+        { name: 'preview_img', maxCount: 1 }
+    ]), // Middleware para manejar la subida de archivos
+    async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { id_author, title, doi, abstract, publication_date, link, status } = req.body;
+            const pdf = req.files['pdf'] ? req.files['pdf'][0].buffer : null; // Obtener el archivo PDF subido
+            const preview_img = req.files['preview_img'] ? req.files['preview_img'][0].buffer : null; // Obtener la imagen de vista previa subida
+
+            // Verificar si el artículo existe
+            const article = await Article.findByPk(id);
+            if (!article) {
+                return res.status(404).json({ message: 'Article not found' });
+            }
+
+            // Actualizar el artículo
+            await article.update({
+                id_author,
+                title,
+                doi,
+                abstract,
+                publication_date,
+                link,
+                pdf: pdf || article.pdf, // Mantener el PDF existente si no se proporciona uno nuevo
+                preview_img: preview_img || article.preview_img, // Mantener la imagen de vista previa existente si no se proporciona una nueva
+                status
+            });
+
+            res.status(200).json(article);
+        } catch (error) {
+            res.status(400).json({ error: error.message });
+        }
     }
-};
+];
 
 export const delete_articles_byid = async (req, res) => {
     try {

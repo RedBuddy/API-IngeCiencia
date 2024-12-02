@@ -1,4 +1,5 @@
 import User from '../database/models/Users';
+import Role from '../database/models/Roles';
 import bcrypt from 'bcrypt';
 import multer from 'multer';
 
@@ -180,6 +181,25 @@ export const delete_users_byid = async (req, res) => {
         }
 
         res.status(204).json({ message: 'User deleted' });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+export const get_authors = async (req, res) => {
+    try {
+        const authors = await User.findAll({
+            attributes: ['id', 'first_name', 'last_name', 'profile_img'],
+            include: [{
+                model: Role,
+                attributes: [],
+                where: {
+                    role_name: ['autor', 'editor', 'admin']
+                }
+            }]
+        });
+
+        res.status(200).json(authors);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
