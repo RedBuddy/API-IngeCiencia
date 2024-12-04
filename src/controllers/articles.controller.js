@@ -170,23 +170,59 @@ export const filter_articles = async (req, res) => {
             where: {
                 [Op.or]: [
                     { title: { [Op.like]: `%${searchString}%` } },
-                    { abstract: { [Op.like]: `%${searchString}%` } }
+                    { abstract: { [Op.like]: `%${searchString}%` } },
+                    { doi: { [Op.like]: `%${searchString}%` } },
+                    { '$User.first_name$': { [Op.like]: `%${searchString}%` } },
+                    { '$User.last_name$': { [Op.like]: `%${searchString}%` } },
+                    { '$User.username$': { [Op.like]: `%${searchString}%` } }
                 ]
-            }
-            // attributes: ['id', 'id_author', 'title', 'doi', 'abstract', 'publication_date', 'link', 'status'],
-            // include: [
-            //     {
-            //         model: User,
-            //         attributes: ['username', 'first_name', 'last_name']
-            //     }
-            // ]
+            },
+            include: [
+                {
+                    model: User,
+                    attributes: ['username', 'first_name', 'last_name'],
+                    required: false // Permitir artículos sin coincidencias en el autor
+                }
+            ]
         });
 
         if (!articles.length) {
-            return res.status(404).json({ message: 'Articles not found' });
+            return res.status(204).json({ message: 'Articles not found' });
         }
 
         res.status(200).json(articles);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+
+export const get_article_author = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const article = await Article.findOne({
+            where: { id },
+            attributes: [],
+            include: [
+                {
+                    model: User,
+                    attributes: ['id', 'first_name', 'last_name', 'profile_img']
+                }
+            ]
+        });
+
+        if (!article) {
+            return res.status(404).json({ message: 'Article not found' });
+        }
+
+        const author = article.User;
+
+        res.status(200).json({
+            first_name: author.first_name,
+            last_name: author.last_name,
+            profile_img: author.profile_img
+        });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
