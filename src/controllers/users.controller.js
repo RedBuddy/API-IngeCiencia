@@ -16,7 +16,7 @@ export const post_users = [
     upload.single('profile_img'), // Middleware para manejar la subida de la imagen de perfil
     async (req, res) => {
         try {
-            const { username, email, password, first_name, last_name, orcid, role_id, status } = req.body;
+            const { username, email, password, first_name, last_name, role_id, status } = req.body;
             const profile_img = req.file ? req.file.buffer : null; // Obtener la imagen de perfil del archivo subido
 
             // Verificar si el username o email ya existen
@@ -40,7 +40,6 @@ export const post_users = [
                 password: hashedPassword,
                 first_name,
                 last_name,
-                orcid,
                 profile_img, // Almacenar la imagen de perfil en la base de datos
                 role_id,
                 status
@@ -121,59 +120,54 @@ export const update_users = [
     upload.single('profile_img'), // Middleware para manejar la subida de la imagen de perfil
     async (req, res) => {
         try {
-            const { first_name, last_name, email, current_password, new_password } = req.body;
+            const { id } = req.params;
+            const { username, email, first_name, last_name, role_id, status, new_password } = req.body;
             const profile_img = req.file ? req.file.buffer : null; // Obtener la imagen de perfil del archivo subido
 
-            const user = await User.findByPk(req.params.id);
+            const user = await User.findByPk(id);
 
             if (!user) {
-                return res.status(404).json({ message: 'Usuario no encontrado' });
+                return res.status(404).json({ message: 'User not found' });
             }
 
             // Verificar la contraseña actual
-            const isPasswordValid = await bcrypt.compare(current_password, user.password);
-            if (!isPasswordValid) {
-                return res.status(400).json({ message: 'Contraseña actual incorrecta' });
-            }
+            // const isMatch = await bcrypt.compare(current_password, user.password);
+            // if (!isMatch) {
+            //     return res.status(400).json({ message: 'Current password is incorrect' });
+            // }
 
-            const updateData = {
-                first_name,
-                last_name
-            };
-
-            // Verificar si el nuevo email ya está en uso por otro usuario
+            // Verificar si el correo electrónico ya existe en otro usuario
             if (email && email !== user.email) {
                 const existingEmail = await User.findOne({ where: { email } });
                 if (existingEmail) {
-                    return res.status(400).json({ message: 'El correo electrónico ya está en uso' });
+                    return res.status(400).json({ message: 'El correo electrónico ya está en uso por otro usuario' });
                 }
-                updateData.email = email;
             }
+
+            // Verificar si se proporciona una nueva contraseña
+            let updatedFields = {
+                username,
+                email: email || user.email, // Mantener el correo electrónico actual si no se proporciona uno nuevo
+                first_name,
+                last_name,
+                role_id,
+                status,
+                profile_img: profile_img || user.profile_img // Mantener la imagen de perfil actual si no se proporciona una nueva
+            };
 
             if (new_password) {
-                updateData.password = await bcrypt.hash(new_password, 10);
+                const hashedPassword = await bcrypt.hash(new_password, 10);
+                updatedFields.password = hashedPassword;
             }
 
-            if (profile_img) {
-                updateData.profile_img = profile_img;
-            }
+            await user.update(updatedFields);
 
-            const [updated] = await User.update(updateData, {
-                where: { id: req.params.id }
-            });
-
-            if (!updated) {
-                return res.status(404).json({ message: 'Error al actualizar usuario' });
-            }
-
-            const updatedUser = await User.findByPk(req.params.id);
-            res.status(200).json({message: 'Usuario actualizado exitosamente'});
+            res.status(200).json({ message: 'User updated successfully', user });
         } catch (error) {
             res.status(400).json({ error: error.message });
         }
     }
 ];
-
 
 export const delete_users_byid = async (req, res) => {
     try {
@@ -259,3 +253,54 @@ export const get_user_details = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
+
+
+export const update_user_by_id = [
+    upload.single('profile_img'), // Middleware para manejar la subida de la imagen de perfil
+    async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { first_name, last_name, email, current_password, new_password } = req.body;
+            const profile_img = req.file ? req.file.buffer : null; // Obtener la imagen de perfil del archivo subido
+
+            const user = await User.findByPk(id);
+
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+
+            // Verificar la contraseña actual
+            const isMatch = await bcrypt.compare(current_password, user.password);
+            if (!isMatch) {
+                return res.status(400).json({ message: 'La contraseña actual es incorrecta' });
+            }
+
+            // Verificar si el correo electrónico ya existe en otro usuario
+            if (email && email !== user.email) {
+                const existingEmail = await User.findOne({ where: { email } });
+                if (existingEmail) {
+                    return res.status(400).json({ message: 'El correo electrónico ya está en uso por otro usuario' });
+                }
+            }
+
+            // Verificar si se proporciona una nueva contraseña
+            let updatedFields = {
+                first_name,
+                last_name,
+                email: email || user.email, // Mantener el correo electrónico actual si no se proporciona uno nuevo
+                profile_img: profile_img || user.profile_img // Mantener la imagen de perfil actual si no se proporciona una nueva
+            };
+
+            if (new_password) {
+                const hashedPassword = await bcrypt.hash(new_password, 10);
+                updatedFields.password = hashedPassword;
+            }
+
+            await user.update(updatedFields);
+
+            res.status(200).json({ message: 'Usuario actualizado exitosamente' });
+        } catch (error) {
+            res.status(400).json({ error: error.message });
+        }
+    }
+];

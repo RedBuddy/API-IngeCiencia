@@ -17,7 +17,6 @@ CREATE TABLE USERS (
     password VARCHAR(255) NOT NULL,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
-    orcid VARCHAR(30),
     registration_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     profile_img MEDIUMBLOB, -- Campo para almacenar la imagen de perfil
     verified BOOLEAN DEFAULT 0,
@@ -28,9 +27,14 @@ CREATE TABLE USERS (
 
 CREATE TABLE PROFILE (
     id_user INT PRIMARY KEY,
-    --faculty VARCHAR(100),
+    university VARCHAR(100),
+    faculty VARCHAR(100),
+    department VARCHAR(100),
+    orcid VARCHAR(30),
     biography TEXT,
     experience TEXT,
+    google_scholar_link VARCHAR(255),
+    research_gate_link VARCHAR(255),
     FOREIGN KEY (id_user) REFERENCES USERS(id)
 );
 
