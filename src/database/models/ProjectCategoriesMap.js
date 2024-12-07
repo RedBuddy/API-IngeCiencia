@@ -8,12 +8,18 @@ class ProjectCategoryMap extends Model { }
 ProjectCategoryMap.init({
     id_project: {
         type: DataTypes.INTEGER,
-        references: { model: ResearchProject, key: 'id' },
+        references: {
+            model: ResearchProject,
+            key: 'id'
+        },
         primaryKey: true
     },
     id_category: {
         type: DataTypes.INTEGER,
-        references: { model: Category, key: 'id' },
+        references: {
+            model: Category,
+            key: 'id'
+        },
         primaryKey: true
     }
 }, {
@@ -23,7 +29,10 @@ ProjectCategoryMap.init({
     timestamps: false
 });
 
-ResearchProject.belongsToMany(Category, { through: ProjectCategoryMap, foreignKey: 'id_project' });
-Category.belongsToMany(ResearchProject, { through: ProjectCategoryMap, foreignKey: 'id_category' });
+// Relaciones
+ProjectCategoryMap.belongsTo(ResearchProject, { foreignKey: 'id_project' });
+ProjectCategoryMap.belongsTo(Category, { foreignKey: 'id_category' });
+ResearchProject.hasMany(ProjectCategoryMap, { foreignKey: 'id_project' });
+Category.hasMany(ProjectCategoryMap, { foreignKey: 'id_category' });
 
 export default ProjectCategoryMap;

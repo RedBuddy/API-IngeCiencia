@@ -3,7 +3,7 @@ import Role from '../database/models/Roles';
 import UserDiscipline from '../database/models/UserDisciplines';
 import Article from '../database/models/Articles';
 import Category from '../database/models/Categories';
-import Profile from '../database/models/Profile';
+// import Profile from '../database/models/Profile';
 import bcrypt from 'bcrypt';
 import multer from 'multer';
 import { Op } from 'sequelize';

@@ -100,11 +100,15 @@ CREATE TABLE ARTICLE_VIEWS (
 -- Tabla RESEARCH_PROJECTS
 CREATE TABLE RESEARCH_PROJECTS (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    id_author INT,
     title VARCHAR(255) NOT NULL,
     details TEXT,
     vacancies INT,
     preview_img MEDIUMBLOB,
-    status ENUM('active', 'inactive') DEFAULT 'active'
+    status ENUM('active', 'inactive') DEFAULT 'active',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_author) REFERENCES USERS(id)
 );
 
 -- Tabla PROJECT_CATEGORIES

@@ -1,5 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 import sequelize from '../connection.js';
+import User from './Users.js';
 
 class ResearchProject extends Model { }
 
@@ -9,22 +10,39 @@ ResearchProject.init({
         primaryKey: true,
         autoIncrement: true
     },
+    id_author: {
+        type: DataTypes.INTEGER,
+        references: { model: User, key: 'id' },
+        allowNull: false
+    },
     title: {
         type: DataTypes.STRING(255),
         allowNull: false
     },
     details: {
-        type: DataTypes.TEXT
+        type: DataTypes.TEXT,
+        allowNull: true
     },
     vacancies: {
-        type: DataTypes.INTEGER
+        type: DataTypes.INTEGER,
+        allowNull: true
     },
-    preview_path: {
-        type: DataTypes.STRING(255)
+    preview_img: {
+        type: DataTypes.BLOB('medium'),
+        allowNull: true
     },
     status: {
         type: DataTypes.ENUM('active', 'inactive'),
         defaultValue: 'active'
+    },
+    created_at: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
+    },
+    updated_at: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
+        onUpdate: DataTypes.NOW
     }
 }, {
     sequelize,
@@ -32,5 +50,9 @@ ResearchProject.init({
     tableName: 'RESEARCH_PROJECTS',
     timestamps: false
 });
+
+// Relaciones
+User.hasMany(ResearchProject, { foreignKey: 'id_author' });
+ResearchProject.belongsTo(User, { foreignKey: 'id_author' });
 
 export default ResearchProject;
