@@ -3,7 +3,7 @@ import Role from '../database/models/Roles';
 import UserDiscipline from '../database/models/UserDisciplines';
 import Article from '../database/models/Articles';
 import Category from '../database/models/Categories';
-// import Profile from '../database/models/Profile';
+import Profile from '../database/models/Profile';
 import bcrypt from 'bcrypt';
 import multer from 'multer';
 import { Op } from 'sequelize';
@@ -225,6 +225,10 @@ export const get_user_details = async (req, res) => {
                         model: Category,
                         attributes: ['category_name']
                     }
+                },
+                {
+                    model: Profile,
+                    attributes: ['university', 'faculty', 'department']
                 }
             ]
         });
@@ -243,7 +247,10 @@ export const get_user_details = async (req, res) => {
                 first_name: user.first_name,
                 last_name: user.last_name,
                 profile_img: user.profile_img,
-                user_disciplines: user.UserDisciplines.map(discipline => discipline.Category.category_name),
+                university: user.Profile ? user.Profile.university : null,
+                faculty: user.Profile ? user.Profile.faculty : null,
+                department: user.Profile ? user.Profile.department : null,
+                user_disciplines: user.UserDisciplines.slice(0, 3).map(discipline => discipline.Category.category_name),
                 publications_count: publicationsCount
             };
         }));

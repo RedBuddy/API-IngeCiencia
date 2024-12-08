@@ -1,5 +1,7 @@
 import Profile from '../database/models/Profile';
 import User from '../database/models/Users';
+import UserDiscipline from '../database/models/UserDisciplines';
+import Category from '../database/models/Categories';
 
 export const post_profile = async (req, res) => {
     try {
@@ -73,6 +75,86 @@ export const delete_profile_byid = async (req, res) => {
         const deleted = await Profile.destroy({ where: { id_user: req.params.id } });
         if (!deleted) return res.status(404).json({ message: 'Profile not found' });
         res.status(204).json();
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+
+export const get_user_card = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const user = await User.findOne({
+            where: { id },
+            attributes: ['first_name', 'last_name', 'email', 'profile_img'],
+            include: [
+                {
+                    model: Profile,
+                    attributes: ['university', 'faculty', 'orcid', 'google_scholar_link', 'research_gate_link']
+                }
+            ]
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const result = {
+            first_name: user.first_name,
+            last_name: user.last_name,
+            email: user.email,
+            profile_img: user.profile_img,
+            university: user.Profile ? user.Profile.university : null,
+            faculty: user.Profile ? user.Profile.faculty : null,
+            orcid: user.Profile ? user.Profile.orcid : null,
+            google_scholar_link: user.Profile ? user.Profile.google_scholar_link : null,
+            research_gate_link: user.Profile ? user.Profile.research_gate_link : null
+        };
+
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+
+export const get_user_about = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const user = await User.findOne({
+            where: { id },
+            attributes: [ 'first_name', 'last_name'],
+            include: [
+                {
+                    model: Profile,
+                    attributes: ['biography', 'experience']
+                },
+                {
+                    model: UserDiscipline,
+                    attributes: ['id_category'],
+                    include: {
+                        model: Category,
+                        attributes: ['category_name']
+                    }
+                }
+            ]
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const result = {
+            first_name: user.first_name,
+            last_name: user.last_name,
+            biography: user.Profile ? user.Profile.biography : null,
+            experience: user.Profile ? user.Profile.experience : null,
+            disciplines: user.UserDisciplines.map(discipline => discipline.Category.category_name)
+        };
+
+        res.status(200).json(result);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

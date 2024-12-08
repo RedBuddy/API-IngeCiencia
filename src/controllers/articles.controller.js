@@ -68,7 +68,7 @@ export const get_articles_by_userid = async (req, res) => {
         });
 
         if (!articles.length) {
-            return res.status(404).json({ message: 'No articles found for this user' });
+            return res.status(204).json({ message: 'No se encontraron articulos para este usuario' });
         }
 
         res.status(200).json(articles);
