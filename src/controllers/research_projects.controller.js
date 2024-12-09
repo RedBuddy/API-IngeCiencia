@@ -74,9 +74,9 @@ export const get_projects_by_userid = async (req, res) => {
             where: { id_author: req.params.id },
         });
 
-        if (!projects.length) {
-            return res.status(204).json({ message: 'No se encontraron proyectos de investigación para este usuario' });
-        }
+        // if (!projects.length) {
+        //     return res.status(204).json({ message: 'No se encontraron proyectos de investigación para este usuario' });
+        // }
 
         res.status(200).json(projects);
     } catch (error) {

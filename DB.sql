@@ -222,3 +222,13 @@ INSERT INTO CATEGORIES (category_name) VALUES
 ('IoT (Internet de las Cosas) para la Industria'),
 ('Ciencia de Datos y Big Data'),
 ('Innovación y Emprendimiento Tecnológico');
+
+
+CREATE TABLE VERIFY_TOKENS (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_user INT NOT NULL,
+    token VARCHAR(255) NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    isValid BOOLEAN DEFAULT FALSE, -- Marca si el token ya fue usado
+    FOREIGN KEY (id_user) REFERENCES users(id) ON DELETE CASCADE
+);

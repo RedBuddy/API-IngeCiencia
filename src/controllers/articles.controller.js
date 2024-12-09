@@ -67,9 +67,9 @@ export const get_articles_by_userid = async (req, res) => {
             where: { id_author: req.params.id }
         });
 
-        if (!articles.length) {
-            return res.status(204).json({ message: 'No se encontraron articulos para este usuario' });
-        }
+        // if (!articles.length) {
+        //     return res.status(200).json({ message: 'No se encontraron artículos para este usuario' });
+        // }
 
         res.status(200).json(articles);
     } catch (error) {
