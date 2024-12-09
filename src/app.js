@@ -19,7 +19,7 @@ import resource_coauthors_routes from './routes/resource_coauthors.routes'
 import resources_routes from './routes/resources.routes'
 import roles_routes from './routes/roles.routes'
 import auth_routes from './routes/auth.routes'
-
+import contact_routes from './routes/contacto.routes'
 
 const app = express()
 
@@ -56,5 +56,6 @@ app.use(resource_coauthors_routes)
 app.use(resources_routes)
 app.use(roles_routes)
 app.use(auth_routes)
+app.use(contact_routes)
 
 export default app
