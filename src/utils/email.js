@@ -12,9 +12,22 @@ export const sendVerificationEmail = async (email, token) => {
     const mailOptions = {
         from: 'orlandolmsm@gmail.com',
         to: email,
-        subject: 'Email Verification',
-        text: `Please verify your email by clicking the following link: http://your-domain.com/verify-email?token=${token}`
-    };
+        subject: 'Email de verificación IngeCiencia',
+        html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+            <h2 style="text-align: center; color: #02182b;">IngeCiencia</h2>
+            <p>Hola,</p>
+            <p>Gracias por registrarte en IngeCiencia. Por favor, verifica tu correo electrónico haciendo clic en el siguiente enlace:</p>
+            <div style="text-align: center; margin: 20px 0;">
+                <a href="http://localhost:4200/verificar-email?token=${token}" style="background-color: #003b5c; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Verificar Email</a>
+            </div>
+            <p >Si no puedes hacer clic en el enlace, copia y pega la token en el cuadro de verificación:</p>
+            <p style="text-align: center;">${token}</p>
+            <p>Gracias,</p>
+            <p>El equipo de IngeCiencia</p>
+        </div>
+    `
+};
 
     await transporter.sendMail(mailOptions);
 };

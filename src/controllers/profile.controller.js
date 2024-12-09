@@ -2,6 +2,9 @@ import Profile from '../database/models/Profile';
 import User from '../database/models/Users';
 import UserDiscipline from '../database/models/UserDisciplines';
 import Category from '../database/models/Categories';
+import Role from '../database/models/Roles';
+import Article from '../database/models/Articles';
+import { Op } from 'sequelize';
 
 export const post_profile = async (req, res) => {
     try {
@@ -153,6 +156,98 @@ export const get_user_about = async (req, res) => {
             experience: user.Profile ? user.Profile.experience : null,
             disciplines: user.UserDisciplines.map(discipline => discipline.Category.category_name)
         };
+
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+export const get_researchers_details = async (req, res) => {
+    try {
+        const users = await User.findAll({
+            attributes: ['id', 'first_name', 'last_name', 'profile_img'],
+            include: [
+                {
+                    model: Role,
+                    where: {
+                        role_name: ['autor', 'editor', 'admin']
+                    },
+                    attributes: []
+                },
+                {
+                    model: Profile,
+                    attributes: ['university', 'faculty', 'department']
+                }
+            ]
+        });
+
+        // if (!users.length) {
+        //     return res.status(404).json({ message: 'Investigadores no encontrados' });
+        // }
+
+        const result = await Promise.all(users.map(async (user) => {
+            const publicationsCount = await Article.count({
+                where: { id_author: user.id }
+            });
+
+            return {
+                id: user.id,
+                first_name: user.first_name,
+                last_name: user.last_name,
+                profile_img: user.profile_img,
+                university: user.Profile ? user.Profile.university : null,
+                faculty: user.Profile ? user.Profile.faculty : null,
+                department: user.Profile ? user.Profile.department : null,
+                publications_count: publicationsCount
+            };
+        }));
+
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+export const get_admin_profile = async (req, res) => {
+    try {
+        const users = await User.findAll({
+            attributes: ['id', 'first_name', 'last_name', 'profile_img', 'email'],
+            include: [
+                {
+                    model: Role,
+                    where: {
+                        role_name: ['admin']
+                    },
+                    attributes: []
+                },
+                {
+                    model: Profile,
+                    attributes: ['university', 'faculty', 'department']
+                }
+            ]
+        });
+
+        // if (!users.length) {
+        //     return res.status(404).json({ message: 'Investigadores no encontrados' });
+        // }
+
+        const result = await Promise.all(users.map(async (user) => {
+            const publicationsCount = await Article.count({
+                where: { id_author: user.id }
+            });
+
+            return {
+                id: user.id,
+                first_name: user.first_name,
+                last_name: user.last_name,
+                profile_img: user.profile_img,
+                university: user.Profile ? user.Profile.university : null,
+                faculty: user.Profile ? user.Profile.faculty : null,
+                department: user.Profile ? user.Profile.department : null,
+                publications_count: publicationsCount
+            };
+        }));
 
         res.status(200).json(result);
     } catch (error) {

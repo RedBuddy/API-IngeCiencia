@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { get_profiles, post_profile, update_profile, delete_profile_byid, get_profile_byid, get_user_card, get_user_about } from "../controllers/profile.controller"
+import { get_profiles, post_profile, update_profile, delete_profile_byid, get_profile_byid, get_user_card, get_user_about, get_researchers_details } from "../controllers/profile.controller"
 
 const router = Router();
 
@@ -11,5 +11,8 @@ router.get('/profile/:id', get_profile_byid);
 
 router.get('/profile_card/:id', get_user_card);
 router.get('/profile_about/:id', get_user_about);
+
+ //Obtener investigadores
+ router.get('/authors_profile', get_researchers_details);
 
 export default router;
