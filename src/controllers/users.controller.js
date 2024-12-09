@@ -282,6 +282,7 @@ export const update_user_by_id = [
                 return res.status(400).json({ message: 'La contraseña actual es incorrecta' });
             }
 
+            
             // Verificar si el correo electrónico ya existe en otro usuario
             if (email && email !== user.email) {
                 const existingEmail = await User.findOne({ where: { email } });
@@ -298,6 +299,11 @@ export const update_user_by_id = [
                 profile_img: profile_img || user.profile_img // Mantener la imagen de perfil actual si no se proporciona una nueva
             };
 
+            // Si el correo electrónico ha cambiado, establecer verified en false
+            if (email && email !== user.email) {
+                updatedFields.verified = false;
+            }
+
             if (new_password) {
                 const hashedPassword = await bcrypt.hash(new_password, 10);
                 updatedFields.password = hashedPassword;
@@ -311,4 +317,3 @@ export const update_user_by_id = [
         }
     }
 ];
-
