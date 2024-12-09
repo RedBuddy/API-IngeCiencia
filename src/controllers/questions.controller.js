@@ -1,13 +1,17 @@
 import Question from '../database/models/Questions';
-import { faker } from '@faker-js/faker';
+import User from '../database/models/Users';
 
 export const post_questions = async (req, res) => {
     try {
+        const { title, body, id_user } = req.body;
+
+        // Crear la nueva pregunta
         const newQuestion = await Question.create({
-            title: faker.lorem.sentence(), // Genera un título aleatorio
-            body: faker.lorem.paragraphs(3), // Genera un cuerpo de pregunta aleatorio
-            id_user: req.body.id_user, // Asegúrate de que este ID existe en la tabla de usuarios
+            title,
+            body,
+            id_user 
         });
+
         res.status(201).json(newQuestion);
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -49,6 +53,37 @@ export const delete_questions_byid = async (req, res) => {
         const deleted = await Question.destroy({ where: { id: req.params.id } });
         if (!deleted) return res.status(404).json({ message: 'Question not found' });
         res.status(204).json();
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+export const get_question_author = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const question = await Question.findOne({
+            where: { id },
+            attributes: [],
+            include: [
+                {
+                    model: User,
+                    attributes: ['id', 'first_name', 'last_name', 'profile_img']
+                }
+            ]
+        });
+
+        if (!question) {
+            return res.status(404).json({ message: 'Question not found' });
+        }
+
+        const author = question.User;
+
+        res.status(200).json({
+            first_name: author.first_name,
+            last_name: author.last_name,
+            profile_img: author.profile_img
+        });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

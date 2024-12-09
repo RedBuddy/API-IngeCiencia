@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { get_questions, post_questions, update_questions, delete_questions_byid, get_questions_byid } from "../controllers/questions.controller"
+import { get_questions, post_questions, update_questions, delete_questions_byid, get_questions_byid, get_question_author } from "../controllers/questions.controller"
 
 const router = Router();
 
@@ -8,5 +8,7 @@ router.post('/questions', post_questions);
 router.put('/questions/:id', update_questions);
 router.delete('/questions/:id', delete_questions_byid);
 router.get('/questions/:id', get_questions_byid);
+
+router.get('/questions/author/:id', get_question_author);
 
 export default router;
