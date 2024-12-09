@@ -2,6 +2,13 @@ import User from '../database/models/Users';
 import Role from '../database/models/Roles'; // Asegúrate de tener un modelo de Roles
 import bcrypt from 'bcrypt';
 import { generateToken, generateRefreshToken, verifyRefreshToken, invalidateRefreshToken } from '../jwtconfig';
+import crypto from 'crypto';
+import VerifyToken from '../database/models/VerifyToken';
+import { sendVerificationEmail } from '../utils/email';
+import multer from 'multer';
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 export const login_users = async (req, res) => {
     const { identifier, password } = req.body;
@@ -70,5 +77,121 @@ export const refresh_token = async (req, res) => {
     } catch (error) {
         console.error('Error al refrescar el token:', error);
         return res.status(401).json({ message: 'Refresh token inválido o expirado' });
+    }
+};
+
+export const register_user = [
+    upload.single('profile_img'), // Middleware para manejar la subida de la imagen de perfil
+    async (req, res) => {
+        try {
+            const { username, email, password, first_name, last_name } = req.body;
+            const profile_img = req.file ? req.file.buffer : null; // Obtener la imagen de perfil del archivo subido
+
+            // Verificar si el correo electrónico ya está en uso
+            const existingEmail = await User.findOne({ where: { email } });
+            if (existingEmail) {
+                return res.status(400).json({ message: 'El correo electrónico ya está en uso' });
+            }
+
+            // Encriptar la contraseña
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            // Crear el nuevo usuario
+            const newUser = await User.create({
+                username,
+                email,
+                password: hashedPassword,
+                first_name,
+                last_name,
+                profile_img // Almacenar la imagen de perfil en la base de datos
+            });
+
+            // Generar el token de verificación
+            const token = crypto.randomBytes(32).toString('hex');
+            const expires_at = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
+
+            // Guardar el token en la base de datos
+            await VerifyToken.create({
+                id_user: newUser.id,
+                token,
+                expires_at
+            });
+
+            // Enviar el correo electrónico de verificación
+            await sendVerificationEmail(newUser.email, token);
+
+            res.status(201).json({ id: newUser.id, message: 'Usuario creado exitosamente. Por favor, verifica tu correo electrónico.' });
+        } catch (error) {
+            res.status(400).json({ error: error.message });
+        }
+    }
+];
+
+export const verify_email = async (req, res) => {
+    try {
+        const { token } = req.query;
+
+        // Buscar el token en la base de datos
+        const verifyToken = await VerifyToken.findOne({ where: { token } });
+
+        if (!verifyToken) {
+            return res.status(400).json({ message: 'Token inválido o expirado' });
+        }
+
+        // Verificar si el token ha expirado
+        if (verifyToken.expires_at < new Date()) {
+            return res.status(400).json({ message: 'Token expirado' });
+        }
+
+        // Verificar si el token ya ha sido usado
+        if (verifyToken.isValid) {
+            return res.status(400).json({ message: 'Token ya ha sido usado' });
+        }
+
+        // Activar la cuenta del usuario
+        await User.update({ verified: true }, { where: { id: verifyToken.id_user } });
+
+        // Marcar el token como usado
+        await verifyToken.update({ isValid: true });
+
+        res.status(200).json({ message: 'Correo electrónico verificado exitosamente' });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+export const resend_verification_email = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Buscar el usuario por ID
+        const user = await User.findByPk(id);
+
+        if (!user) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        // Verificar si el usuario ya está verificado
+        if (user.verified) {
+            return res.status(400).json({ message: 'El usuario ya está verificado' });
+        }
+
+        // Generar un nuevo token de verificación
+        const token = crypto.randomBytes(32).toString('hex');
+        const expires_at = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
+
+        // Guardar el nuevo token en la base de datos
+        await VerifyToken.create({
+            id_user: user.id,
+            token,
+            expires_at
+        });
+
+        // Enviar el correo electrónico de verificación
+        await sendVerificationEmail(user.email, token);
+
+        res.status(200).json({ message: 'Correo de verificación reenviado exitosamente' });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
     }
 };
