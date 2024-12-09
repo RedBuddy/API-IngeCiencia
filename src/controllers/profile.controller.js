@@ -212,7 +212,7 @@ export const get_researchers_details = async (req, res) => {
 export const get_admin_profile = async (req, res) => {
     try {
         const users = await User.findAll({
-            attributes: ['id', 'first_name', 'last_name', 'profile_img', 'email'],
+            attributes: ['id', 'first_name', 'last_name', 'email', 'profile_img'],
             include: [
                 {
                     model: Role,
@@ -241,6 +241,7 @@ export const get_admin_profile = async (req, res) => {
                 id: user.id,
                 first_name: user.first_name,
                 last_name: user.last_name,
+                email: user.email,
                 profile_img: user.profile_img,
                 university: user.Profile ? user.Profile.university : null,
                 faculty: user.Profile ? user.Profile.faculty : null,
