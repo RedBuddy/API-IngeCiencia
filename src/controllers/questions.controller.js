@@ -88,3 +88,19 @@ export const get_question_author = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
+
+export const get_questions_by_userid = async (req, res) => {
+    try {
+        const questions = await Question.findAll({
+            where: { id_user: req.params.id }
+        });
+
+        // if (!questions.length) {
+        //     return res.status(204).json({ message: 'No se encontraron preguntas para este usuario' });
+        // }
+
+        res.status(200).json(questions);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
