@@ -1,4 +1,5 @@
 import Article from '../database/models/Articles';
+import ArticleView from '../database/models/ArticleViews';
 import User from '../database/models/Users';
 import multer from 'multer';
 import { Op } from 'sequelize';
@@ -54,6 +55,11 @@ export const get_articles_byid = async (req, res) => {
         if (!article) {
             return res.status(404).json({ message: 'Artículo no encontrado' });
         }
+
+        // Registrar una vista al artículo
+        await ArticleView.create({
+            id_article: article.id
+        });
 
         res.status(200).json(article);
     } catch (error) {

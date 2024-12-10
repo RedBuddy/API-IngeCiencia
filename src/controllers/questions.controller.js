@@ -30,7 +30,7 @@ export const get_questions = async (req, res) => {
 export const get_questions_byid = async (req, res) => {
     try {
         const question = await Question.findByPk(req.params.id);
-        if (!question) return res.status(404).json({ message: 'Question not found' });
+        if (!question) return res.status(404).json({ message: 'Pregunta no encontrada' });
         res.status(200).json(question);
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -40,7 +40,7 @@ export const get_questions_byid = async (req, res) => {
 export const update_questions = async (req, res) => {
     try {
         const [updated] = await Question.update(req.body, { where: { id: req.params.id } });
-        if (!updated) return res.status(404).json({ message: 'Question not found' });
+        if (!updated) return res.status(404).json({ message: 'Pregunta no encontrada' });
         const updatedQuestion = await Question.findByPk(req.params.id);
         res.status(200).json(updatedQuestion);
     } catch (error) {
@@ -51,7 +51,7 @@ export const update_questions = async (req, res) => {
 export const delete_questions_byid = async (req, res) => {
     try {
         const deleted = await Question.destroy({ where: { id: req.params.id } });
-        if (!deleted) return res.status(404).json({ message: 'Question not found' });
+        if (!deleted) return res.status(404).json({ message: 'Pregunta no encontrada' });
         res.status(204).json();
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -74,7 +74,7 @@ export const get_question_author = async (req, res) => {
         });
 
         if (!question) {
-            return res.status(404).json({ message: 'Question not found' });
+            return res.status(404).json({ message: 'Pregunta no encontrada' });
         }
 
         const author = question.User;
@@ -100,6 +100,25 @@ export const get_questions_by_userid = async (req, res) => {
         // }
 
         res.status(200).json(questions);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+
+export const deactivate_question_byid = async (req, res) => {
+    try {
+        const [updated] = await Question.update(
+            { active: false },
+            { where: { id: req.params.id } }
+        );
+
+        if (!updated) {
+            return res.status(404).json({ message: 'Pregunta no encontrada' });
+        }
+
+        const updatedQuestion = await Question.findByPk(req.params.id);
+        res.status(200).json({ message: 'Pregunta desactivada' });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

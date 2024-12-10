@@ -25,6 +25,10 @@ Question.init({
             key: 'id'
         }
     },
+    active: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
+    },
     created_at: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW

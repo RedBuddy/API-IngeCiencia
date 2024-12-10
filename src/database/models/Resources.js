@@ -28,8 +28,9 @@ Resource.init({
     link: {
         type: DataTypes.STRING(255)
     },
-    pdf_path: {
-        type: DataTypes.STRING(255)
+    pdf: {
+        type: DataTypes.BLOB('long'), 
+        allowNull: true
     },
     publication_date: {
         type: DataTypes.DATE,

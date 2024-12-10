@@ -87,6 +87,11 @@ export const login_users = async (req, res) => {
             return res.status(403).json({ message: 'Verifica tu correo electrónico antes de iniciar sesión' });
         }
 
+        // Verificar si el estado del usuario no es inactive
+        if (user.status === 'inactive') {
+            return res.status(401).json({ message: 'Tu cuenta está inactiva. Contacta al soporte.' });
+        }
+
         // Generar un token JWT y un refresh token con los datos del usuario
         const token = generateToken({ user_id: user.id, username: user.username, role: user.Role.role_name });
         const refreshToken = await generateRefreshToken({ user_id: user.id });
