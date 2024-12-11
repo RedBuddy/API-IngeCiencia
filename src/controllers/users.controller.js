@@ -116,12 +116,32 @@ export const get_users_byid = async (req, res) => {
     }
 };
 
+
+export const get_user_data_byid = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const user = await User.findOne({
+            where: { id },
+            attributes: ['id', 'first_name', 'last_name', 'email']
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
 export const update_users = [
     upload.single('profile_img'), // Middleware para manejar la subida de la imagen de perfil
     async (req, res) => {
         try {
             const { id } = req.params;
-            const { username, email, first_name, last_name, role_id, status, new_password } = req.body;
+            const { username, email, first_name, last_name, verified, role_id, status, new_password } = req.body;
             const profile_img = req.file ? req.file.buffer : null; // Obtener la imagen de perfil del archivo subido
 
             const user = await User.findByPk(id);
@@ -129,12 +149,6 @@ export const update_users = [
             if (!user) {
                 return res.status(404).json({ message: 'User not found' });
             }
-
-            // Verificar la contraseña actual
-            // const isMatch = await bcrypt.compare(current_password, user.password);
-            // if (!isMatch) {
-            //     return res.status(400).json({ message: 'Current password is incorrect' });
-            // }
 
             // Verificar si el correo electrónico ya existe en otro usuario
             if (email && email !== user.email) {
@@ -150,6 +164,7 @@ export const update_users = [
                 email: email || user.email, // Mantener el correo electrónico actual si no se proporciona uno nuevo
                 first_name,
                 last_name,
+                verified,
                 role_id,
                 status,
                 profile_img: profile_img || user.profile_img // Mantener la imagen de perfil actual si no se proporciona una nueva
