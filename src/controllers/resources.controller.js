@@ -1,23 +1,33 @@
 import Resource from '../database/models/Resources';
 import User from '../database/models/Users';
+import multer from 'multer';
 
-export const post_resources = async (req, res) => {
-    try {
-        const { title, description, url, id_user } = req.body;
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
-        // Crear el nuevo recurso
-        const newResource = await Resource.create({
-            title,
-            description,
-            url,
-            id_user
-        });
+export const post_resources = [
+    upload.single('pdf'), // Middleware para manejar la subida del archivo PDF
+    async (req, res) => {
+        try {
+            const { title, description, resource_category, link, id_author } = req.body;
+            const pdf = req.file ? req.file.buffer : null; // Obtener el archivo PDF subido
 
-        res.status(201).json(newResource);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
+            // Crear el nuevo recurso
+            const newResource = await Resource.create({
+                title,
+                description,
+                resource_category,
+                link,
+                id_author,
+                pdf // Almacenar el archivo PDF en la base de datos
+            });
+
+            res.status(201).json(newResource);
+        } catch (error) {
+            res.status(400).json({ error: error.message });
+        }
     }
-};
+];
 
 export const get_resources = async (req, res) => {
     try {
@@ -38,16 +48,35 @@ export const get_resources_byid = async (req, res) => {
     }
 };
 
-export const update_resources = async (req, res) => {
-    try {
-        const [updated] = await Resource.update(req.body, { where: { id: req.params.id } });
-        if (!updated) return res.status(404).json({ message: 'Recurso no encontrado' });
-        const updatedResource = await Resource.findByPk(req.params.id);
-        res.status(200).json(updatedResource);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
+export const update_resources = [
+    upload.single('pdf'), // Middleware para manejar la subida del archivo PDF
+    async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { title, description, resource_category, link } = req.body;
+            const pdf = req.file ? req.file.buffer : null; // Obtener el archivo PDF subido
+
+            // Verificar si el recurso existe
+            const resource = await Resource.findByPk(id);
+            if (!resource) {
+                return res.status(404).json({ message: 'Recurso no encontrado' });
+            }
+
+            // Actualizar el recurso
+            await resource.update({
+                title,
+                description,
+                resource_category,
+                link,
+                pdf: pdf || resource.pdf // Mantener el archivo PDF existente si no se proporciona uno nuevo
+            });
+
+            res.status(200).json(resource);
+        } catch (error) {
+            res.status(400).json({ error: error.message });
+        }
     }
-};
+];
 
 export const delete_resources_byid = async (req, res) => {
     try {
