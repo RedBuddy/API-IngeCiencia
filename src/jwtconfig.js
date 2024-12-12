@@ -7,7 +7,7 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'your_jwt_refresh_s
 
 // Función para generar un token JWT
 export const generateToken = (user) => {
-    return jwt.sign(user, JWT_SECRET, { expiresIn: '2m' });
+    return jwt.sign(user, JWT_SECRET, { expiresIn: '1h' });
 };
 
 // Función para generar un refresh token
