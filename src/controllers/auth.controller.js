@@ -302,6 +302,11 @@ export const reset_password = async (req, res) => {
             return res.status(400).json({ message: 'Token expirado' });
         }
 
+         // Verificar si el token ya ha sido usado
+         if (verifyToken.isValid) {
+            return res.status(410).json({ message: 'El token ya ha sido usado' });
+        }
+
         // Encriptar la nueva contraseña
         const hashedPassword = await bcrypt.hash(new_password, 10);
 

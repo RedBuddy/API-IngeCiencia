@@ -55,8 +55,8 @@ export const sendRecoveryEmail = async (email, token) => {
                 <div style="text-align: center; margin: 20px 0;">
                     <a href="http://localhost:4200/reset-password?token=${token}" style="background-color: #003b5c; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Restablecer contraseña</a>
                 </div>
-                <p>Si no puedes hacer clic en el enlace, copia y pega la token en el cuadro de verificación:</p>
-                <p><a href="http://localhost:4200/reset-password?token=${token}">${token}</a></p>
+                <p>Si no puedes hacer clic en el enlace, copia y pega la siguiente URL en tu navegador:</p>
+                <p><a href="http://localhost:4200/reset-password?token=${token}">http://localhost:4200/reset-password?token=${token}</a></p>
                 <p>Gracias,</p>
                 <p>El equipo de IngeCiencia</p>
             </div>
