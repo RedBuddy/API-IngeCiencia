@@ -85,6 +85,7 @@ export const get_question_author = async (req, res) => {
         const author = question.User;
 
         res.status(200).json({
+            id: author.id,
             first_name: author.first_name,
             last_name: author.last_name,
             profile_img: author.profile_img
