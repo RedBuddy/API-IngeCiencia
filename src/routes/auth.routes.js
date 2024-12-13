@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { login_users, refresh_token, register_user, verify_email, resend_verification_email, login_verify_bypass } from "../controllers/auth.controller";
+import { login_users, refresh_token, register_user, verify_email, resend_verification_email, login_verify_bypass, request_password_reset, reset_password } from "../controllers/auth.controller";
 import { verifyJwtToken } from '../middlewares/auth_middleware';
 import { verifyRoles } from '../middlewares/role_middleware';
 import { ro } from "@faker-js/faker";
@@ -12,6 +12,9 @@ router.post('/refresh-token', refresh_token);
 router.post('/register', register_user);
 router.get('/verify-email', verify_email);
 router.post('/resend-verification-email', resend_verification_email);
+
+router.post('/request-password-reset', request_password_reset);
+router.post('/reset-password', reset_password);
 
 // router.get('/users', verifyJwtToken, verifyRoles('admin'), get_users);
 // // router.get('/users', get_users);

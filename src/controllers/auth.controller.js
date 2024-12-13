@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 import { generateToken, generateRefreshToken, verifyRefreshToken, invalidateRefreshToken } from '../jwtconfig';
 import crypto from 'crypto';
 import VerifyToken from '../database/models/VerifyToken';
-import { sendVerificationEmail } from '../utils/email';
+import { sendVerificationEmail, sendRecoveryEmail } from '../utils/email';
 import multer from 'multer';
 
 const storage = multer.memoryStorage();
@@ -250,6 +250,68 @@ export const resend_verification_email = async (req, res) => {
         await sendVerificationEmail(user.email, token);
 
         res.status(200).json({ message: 'Correo de verificación reenviado exitosamente' });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+export const request_password_reset = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        // Buscar el usuario por correo electrónico
+        const user = await User.findOne({ where: { email } });
+
+        if (!user) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        // Generar el token de recuperación
+        const token = crypto.randomBytes(32).toString('hex');
+        const expires_at = new Date(Date.now() + 1 * 60 * 60 * 1000); // 1 hora
+
+        // Guardar el token en la base de datos
+        await VerifyToken.create({
+            id_user: user.id,
+            token,
+            expires_at
+        });
+
+        // Enviar el correo electrónico de recuperación
+        await sendRecoveryEmail(user.email, token);
+
+        res.status(200).json({ message: 'Correo de recuperación enviado exitosamente' });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+export const reset_password = async (req, res) => {
+    try {
+        const { token, new_password } = req.body;
+
+        // Buscar el token en la base de datos
+        const verifyToken = await VerifyToken.findOne({ where: { token } });
+
+        if (!verifyToken) {
+            return res.status(400).json({ message: 'Token inválido o expirado' });
+        }
+
+        // Verificar si el token ha expirado
+        if (verifyToken.expires_at < new Date()) {
+            return res.status(400).json({ message: 'Token expirado' });
+        }
+
+        // Encriptar la nueva contraseña
+        const hashedPassword = await bcrypt.hash(new_password, 10);
+
+        // Actualizar la contraseña del usuario
+        await User.update({ password: hashedPassword }, { where: { id: verifyToken.id_user } });
+
+        // Marcar el token como usado
+        await verifyToken.update({ isValid: true });
+
+        res.status(200).json({ message: 'Contraseña restablecida exitosamente' });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
