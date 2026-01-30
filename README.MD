@@ -2,7 +2,7 @@
 
 ## por Apodaca Concha Orlando Armando
 
-### Hecho en Node.js con Express y SQLServer
+### Hecho en Node.js con Express y MySQL
 
 #### Parametros .env
 
