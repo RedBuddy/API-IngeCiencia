@@ -1,28 +1,36 @@
-import { DataTypes, Model } from 'sequelize';
-import sequelize from '../connection.js';
-import Article from './Articles.js';
+import { DataTypes, Model } from "sequelize";
+import sequelize from "../connection.js";
+import Article from "./Articles.js";
 
-class ArticleView extends Model { }
+class ArticleView extends Model {}
 
-ArticleView.init({
+ArticleView.init(
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
     id_article: {
-        type: DataTypes.INTEGER,
-        references: { model: Article, key: 'id' },
-        primaryKey: true
+      type: DataTypes.INTEGER,
+      references: { model: Article, key: "id" },
+      allowNull: false,
     },
     view_date: {
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW
-    }
-}, {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
+  },
+  {
     sequelize,
-    modelName: 'ArticleView',
-    tableName: 'ARTICLE_VIEWS',
-    timestamps: false
-});
+    modelName: "ArticleView",
+    tableName: "ARTICLE_VIEWS",
+    timestamps: false,
+  }
+);
 
 // Relaciones
-Article.hasMany(ArticleView, { foreignKey: 'id_article' });
-ArticleView.belongsTo(Article, { foreignKey: 'id_article' });
+Article.hasMany(ArticleView, { foreignKey: "id_article" });
+ArticleView.belongsTo(Article, { foreignKey: "id_article" });
 
 export default ArticleView;
